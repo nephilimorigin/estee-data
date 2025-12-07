@@ -8,14 +8,14 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    body 
-   <div class="top-nav">
-  <a href="setup.html">🎯 Ayı Başlat</a>
-  <a href="form.html">📝 Günlük Veri</a>
-  <a href="dashboard.html">📊 Dashboard</a>
-</div> {
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
       font-family: Arial;
       padding: 20px;
+      margin: 0;
       background: linear-gradient(135deg, #e1eafe, #f7d9e8, #d9f7f1);
       background-size: 300% 300%;
       animation: bgMove 10s ease infinite;
@@ -26,6 +26,26 @@
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
       100% { background-position: 0% 50%; }
+    }
+
+    /* Üst menü */
+    .top-nav {
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(10px);
+      padding: 12px;
+      border-radius: 16px;
+      margin-bottom: 20px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+
+    .top-nav a {
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 600;
+      color: #4b3f72;
     }
 
     h1 {
@@ -85,6 +105,13 @@
 
 <body>
 
+<!-- Üst menü -->
+<div class="top-nav">
+  <a href="setup.html">🎯 Ayı Başlat</a>
+  <a href="form.html">📝 Günlük Veri</a>
+  <a href="dashboard.html">📊 Dashboard</a>
+</div>
+
 <h1>📊 Aylık Dashboard</h1>
 
 <div class="card">
@@ -137,8 +164,7 @@
 </table>
 
 <script type="module">
-
-  import { initializeApp }
+  import { initializeApp } 
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
 
   import { getFirestore, collection, getDocs, query, orderBy, limit }
@@ -163,7 +189,9 @@
     const snap = await getDocs(q);
     snap.forEach(doc => settings = doc.data());
 
-    document.getElementById("ciroHedef").innerText = settings.ciroHedef;
+    if (settings) {
+      document.getElementById("ciroHedef").innerText = settings.ciroHedef;
+    }
     return settings;
   }
 
@@ -180,6 +208,7 @@
 
   function fillTable(data) {
     const tbody = document.getElementById("dataTable");
+    tbody.innerHTML = "";
     data.forEach(x => {
       tbody.innerHTML += `
         <tr>
@@ -210,14 +239,13 @@
   }
 
   async function main() {
-
     await loadSettings();
     let data = await loadDaily();
 
     fillTable(data);
 
     let toplamCiro = sum(data, "ciro");
-    let kalanCiro = settings.ciroHedef - toplamCiro;
+    let kalanCiro = (settings?.ciroHedef || 0) - toplamCiro;
     let gunlukGerek = kalanCiro / 30;
 
     document.getElementById("ciroYapilan").innerText = toplamCiro;
@@ -280,11 +308,9 @@
         ]
       }
     });
-
   }
 
   main();
-
 </script>
 
 </body>
