@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard</title>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      background: #0b0f17;
+      font-family: Arial;
+      color: white;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #00eaff;
+      text-shadow: 0 0 10px #00eaff;
+      margin-bottom: 25px;
+    }
+
+    .card {
+      background: #111827;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 18px;
+      box-shadow: 0 0 12px rgba(0,255,255,0.20);
+    }
+
+    .card h2 {
+      margin: 0;
+      font-size: 18px;
+      color: #00eaff;
+    }
+
+    .value {
+      font-size: 26px;
+      font-weight: bold;
+      margin-top: 8px;
+      color: #fff;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 25px;
+      background: #111827;
+    }
+
+    th, td {
+      padding: 10px;
+      border-bottom: 1px solid #333;
+    }
+
+    th {
+      background: #1f2937;
+      color: #00eaff;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>📊 Aylık Dashboard</h1>
+
+<div class="card">
+  <h2>Aylık Ciro Performansı</h2>
+  <p class="value">Hedef: <span id="ciroHedef">0</span> TL</p>
+  <p class="value">Yapılan: <span id="ciroYapilan">0</span> TL</p>
+  <p class="value">Kalan: <span id="ciroKalan">0</span> TL</p>
+  <p class="value">Günlük Gerekli: <span id="ciroGunluk">0</span> TL</p>
+</div>
+
+<div id="fokusContainer"></div>
+
+<div class="card">
+  <h2>Müşteri Analitiği</h2>
+  <p class="value">Yeni Müşteri: <span id="yeniTop">0</span></p>
+  <p class="value">Satın Alan: <span id="satinTop">0</span></p>
+  <p class="value">Conversion Rate: <span id="cr">0%</span></p>
+  <p class="value">Durdurulan: <span id="durdurTop">0</span></p>
+  <p class="value">Stopper Success: <span id="ssr">0%</span></p>
+  <p class="value">Davet → Satın Alan: <span id="davetsatinTop">0</span></p>
+  <p class="value">Invite Conversion: <span id="icr">0%</span></p>
+</div>
+
+<div class="card">
+  <h2>Günlük Ciro Grafiği</h2>
+  <canvas id="ciroChart"></canvas>
+</div>
+
+<div class="card">
+  <h2>Fokus Ürün Grafikleri</h2>
+  <canvas id="fokusChart"></canvas>
+</div>
+
+<h2 style="margin-top:35px;color:#00eaff;">📄 Günlük Kayıtlar</h2>
+
+<table>
+  <tr>
+    <th>Tarih</th>
+    <th>Ciro</th>
+    <th>Fokus1</th>
+    <th>Fokus2</th>
+    <th>Fokus3</th>
+    <th>Not</th>
+  </tr>
+  <tbody id="dataTable"></tbody>
+</table>
+
+<script type="module">
+
+  import { initializeApp }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+
+  import { getFirestore, collection, getDocs, query, orderBy, limit }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBgh7QT9ORiww11m78X0GxaoPaU_kGB07E",
+    authDomain: "estee-lauder-app.firebaseapp.com",
+    projectId: "estee-lauder-app",
+    storageBucket: "estee-lauder-app.firebasestorage.app",
+    messagingSenderId: "585743636422",
+    appId: "1:585743636422:web:cb7094f89a04ad6deb84c7"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  let settings = null;
+
+  async function loadSettings() {
+    const q = query(collection(db, "settings"), orderBy("createdAt", "desc"), limit(1));
+    const snap = await getDocs(q);
+    snap.forEach(doc => settings = doc.data());
+
+    document.getElementById("ciroHedef").innerText = settings.ciroHedef;
+    return settings;
+  }
+
+  async function loadDaily() {
+    const snap = await getDocs(collection(db, "daily"));
+    let data = [];
+    snap.forEach(doc => data.push(doc.data()));
+    return data;
+  }
+
+  function sum(arr, key) {
+    return arr.reduce((t, x) => t + Number(x[key] || 0), 0);
+  }
+
+  function fillTable(data) {
+    const tbody = document.getElementById("dataTable");
+    data.forEach(x => {
+      tbody.innerHTML += `
+        <tr>
+          <td>${x.tarih}</td>
+          <td>${x.ciro}</td>
+          <td>${x.fokus1}</td>
+          <td>${x.fokus2}</td>
+          <td>${x.fokus3}</td>
+          <td>${x.not || ""}</td>
+        </tr>
+      `;
+    });
+  }
+
+  function fokusCard(ad, hedef, satilan) {
+    let kalan = hedef - satilan;
+    let gunlukGerek = kalan / 30;
+
+    return `
+      <div class="card">
+        <h2>${ad}</h2>
+        <p class="value">Hedef: ${hedef}</p>
+        <p class="value">Satılan: ${satilan}</p>
+        <p class="value">Kalan: ${kalan}</p>
+        <p class="value">Günlük Gerekli: ${gunlukGerek.toFixed(1)}</p>
+      </div>
+    `;
+  }
+
+  async function main() {
+
+    await loadSettings();
+    let data = await loadDaily();
+
+    fillTable(data);
+
+    let toplamCiro = sum(data, "ciro");
+    let kalanCiro = settings.ciroHedef - toplamCiro;
+    let gunlukGerek = kalanCiro / 30;
+
+    document.getElementById("ciroYapilan").innerText = toplamCiro;
+    document.getElementById("ciroKalan").innerText = kalanCiro;
+    document.getElementById("ciroGunluk").innerText = gunlukGerek.toFixed(1);
+
+    let fokus1Top = sum(data, "fokus1");
+    let fokus2Top = sum(data, "fokus2");
+    let fokus3Top = sum(data, "fokus3");
+
+    document.getElementById("fokusContainer").innerHTML =
+      fokusCard(settings.fokus1_ad, settings.fokus1_hedef, fokus1Top) +
+      fokusCard(settings.fokus2_ad, settings.fokus2_hedef, fokus2Top) +
+      fokusCard(settings.fokus3_ad, settings.fokus3_hedef, fokus3Top);
+
+    let yeniTop = sum(data, "yeni");
+    let satinTop = sum(data, "satin");
+    let durdurTop = sum(data, "durdurulan");
+    let davetTop = sum(data, "davet");
+    let davetsatinTop = sum(data, "davetsatin");
+
+    document.getElementById("yeniTop").innerText = yeniTop;
+    document.getElementById("satinTop").innerText = satinTop;
+    document.getElementById("durdurTop").innerText = durdurTop;
+    document.getElementById("davetsatinTop").innerText = davetsatinTop;
+
+    let cr = (satinTop / yeniTop) * 100 || 0;
+    let ssr = (satinTop / durdurTop) * 100 || 0;
+    let icr = (davetsatinTop / davetTop) * 100 || 0;
+
+    document.getElementById("cr").innerText = cr.toFixed(1) + "%";
+    document.getElementById("ssr").innerText = ssr.toFixed(1) + "%";
+    document.getElementById("icr").innerText = icr.toFixed(1) + "%";
+
+    let labels = data.map(x => x.tarih);
+    let ciroValues = data.map(x => x.ciro);
+
+    new Chart(document.getElementById("ciroChart"), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: "Günlük Ciro",
+          data: ciroValues,
+          borderColor: "#00eaff",
+          borderWidth: 3
+        }]
+      }
+    });
+
+    new Chart(document.getElementById("fokusChart"), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [
+          { label: settings.fokus1_ad, data: data.map(x => x.fokus1), borderColor: "#31ff6a" },
+          { label: settings.fokus2_ad, data: data.map(x => x.fokus2), borderColor: "#ff6bff" },
+          { label: settings.fokus3_ad, data: data.map(x => x.fokus3), borderColor: "#ffaa31" }
+        ]
+      }
+    });
+
+  }
+
+  main();
+
+</script>
+
+</body>
+</html>
