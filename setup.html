@@ -3,125 +3,128 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ayı Başlat - Satış Hedef Ayarları</title>
+  <title>Ayi Başlat</title>
 
   <style>
     body {
-      background: #0b0f17;
-      font-family: Arial, sans-serif;
-      color: white;
+      background: linear-gradient(135deg, #f3e7ff, #d6ecff);
+      font-family: Arial;
       padding: 20px;
+      color: #4a4a4a;
     }
 
     h1 {
       text-align: center;
-      color: #00eaff;
-      text-shadow: 0 0 10px #00eaff;
+      font-size: 30px;
+      margin-bottom: 25px;
+      color: #6a5acd;
+      text-shadow: 0 0 8px rgba(106, 90, 205, 0.4);
     }
 
     .card {
-      background: #111827;
+      background: rgba(255, 255, 255, 0.7);
       padding: 20px;
-      margin-bottom: 20px;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0, 234, 255, 0.2);
+      border-radius: 18px;
+      margin-bottom: 25px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      backdrop-filter: blur(8px);
+    }
+
+    .card h2 {
+      margin: 0 0 12px 0;
+      font-size: 20px;
+      color: #6a5acd;
     }
 
     label {
-      font-weight: bold;
-      margin-top: 12px;
-      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #555;
     }
 
     input {
       width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 8px;
-      border: none;
-      background: #1f2937;
-      color: white;
+      padding: 12px;
+      margin-top: 6px;
+      margin-bottom: 18px;
+      border-radius: 10px;
+      border: 1px solid #ccc;
+      font-size: 15px;
+      background: white;
     }
 
     button {
       width: 100%;
-      background: #00eaff;
-      padding: 14px;
+      background: linear-gradient(135deg, #ffafcc, #a5d8ff);
       border: none;
-      border-radius: 10px;
+      padding: 15px;
       font-size: 18px;
-      margin-top: 20px;
-      color: black;
+      border-radius: 14px;
       font-weight: bold;
-      cursor: pointer;
+      color: white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
     }
 
-    #successMsg {
-      display: none;
-      margin-top: 20px;
-      color: #31ff6a;
-      font-weight: bold;
+    #success {
       text-align: center;
+      margin-top: 15px;
+      font-size: 18px;
+      color: #4caf50;
+      font-weight: bold;
+      display: none;
     }
   </style>
 </head>
 
 <body>
 
-<h1>📅 Ayı Başlat</h1>
+<h1>📅 Ayi Başlat</h1>
 
 <div class="card">
-  <h3>Aylık Ciro Hedefi</h3>
+  <h2>Aylık Ciro Hedefi</h2>
+
   <label>Ciro Hedefi (TL)</label>
-  <input type="number" id="ciroHedef" placeholder="Örn: 100000">
+  <input id="ciroHedef" type="number" placeholder="Örn: 100000" />
 </div>
 
 <div class="card">
-  <h3>Fokus Ürün 1</h3>
+  <h2>Fokus Ürün 1</h2>
+
   <label>Fokus 1 Adı</label>
-  <input type="text" id="f1_ad">
+  <input id="fokus1_ad" type="text" placeholder="Örn: Moisture Surge" />
 
   <label>Fokus 1 Aylık Hedef Adedi</label>
-  <input type="number" id="f1_hedef">
+  <input id="fokus1_hedef" type="number" placeholder="Örn: 30" />
 </div>
 
 <div class="card">
-  <h3>Fokus Ürün 2</h3>
+  <h2>Fokus Ürün 2</h2>
+
   <label>Fokus 2 Adı</label>
-  <input type="text" id="f2_ad">
+  <input id="fokus2_ad" type="text" placeholder="Ürün adı" />
 
   <label>Fokus 2 Aylık Hedef Adedi</label>
-  <input type="number" id="f2_hedef">
+  <input id="fokus2_hedef" type="number" placeholder="Örn: 20" />
 </div>
 
 <div class="card">
-  <h3>Fokus Ürün 3</h3>
+  <h2>Fokus Ürün 3</h2>
+
   <label>Fokus 3 Adı</label>
-  <input type="text" id="f3_ad">
+  <input id="fokus3_ad" type="text" placeholder="Ürün adı" />
 
   <label>Fokus 3 Aylık Hedef Adedi</label>
-  <input type="number" id="f3_hedef">
+  <input id="fokus3_hedef" type="number" placeholder="Örn: 10" />
 </div>
 
-<div class="card">
-  <h3>Tarih Aralığı</h3>
-  <label>Başlangıç Tarihi</label>
-  <input type="date" id="baslangic">
-
-  <label>Bitiş Tarihi</label>
-  <input type="date" id="bitis">
-</div>
-
-<button id="saveBtn">📌 Ayı Başlat</button>
-
-<p id="successMsg">✔ Ay ayarları kaydedildi!</p>
+<button id="saveBtn">Kaydet</button>
+<p id="success">✨ Kayıt Başarılı!</p>
 
 <script type="module">
-
   import { initializeApp }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
 
-  import { getFirestore, collection, addDoc }
+  import { getFirestore, addDoc, collection }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -136,31 +139,22 @@
   const app = initializeApp(firebaseConfig);
   const db = getFirestore(app);
 
-  document.getElementById("saveBtn").addEventListener("click", async () => {
-
+  document.getElementById("saveBtn").onclick = async () => {
     const data = {
       ciroHedef: Number(document.getElementById("ciroHedef").value),
-
-      fokus1_ad: document.getElementById("f1_ad").value,
-      fokus1_hedef: Number(document.getElementById("f1_hedef").value),
-
-      fokus2_ad: document.getElementById("f2_ad").value,
-      fokus2_hedef: Number(document.getElementById("f2_hedef").value),
-
-      fokus3_ad: document.getElementById("f3_ad").value,
-      fokus3_hedef: Number(document.getElementById("f3_hedef").value),
-
-      baslangic: document.getElementById("baslangic").value,
-      bitis: document.getElementById("bitis").value,
-
-      createdAt: new Date().toISOString().split("T")[0]
+      fokus1_ad: document.getElementById("fokus1_ad").value,
+      fokus1_hedef: Number(document.getElementById("fokus1_hedef").value),
+      fokus2_ad: document.getElementById("fokus2_ad").value,
+      fokus2_hedef: Number(document.getElementById("fokus2_hedef").value),
+      fokus3_ad: document.getElementById("fokus3_ad").value,
+      fokus3_hedef: Number(document.getElementById("fokus3_hedef").value),
+      createdAt: new Date().toISOString()
     };
 
     await addDoc(collection(db, "settings"), data);
 
-    document.getElementById("successMsg").style.display = "block";
-  });
-
+    document.getElementById("success").style.display = "block";
+  };
 </script>
 
 </body>
