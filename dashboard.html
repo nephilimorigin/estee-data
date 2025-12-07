@@ -9,55 +9,71 @@
 
   <style>
     body {
-      background: #0b0f17;
       font-family: Arial;
-      color: white;
       padding: 20px;
+      background: linear-gradient(135deg, #e1eafe, #f7d9e8, #d9f7f1);
+      background-size: 300% 300%;
+      animation: bgMove 10s ease infinite;
+      color: #444;
+    }
+
+    @keyframes bgMove {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
     }
 
     h1 {
       text-align: center;
-      color: #00eaff;
-      text-shadow: 0 0 10px #00eaff;
+      color: #6a4cff;
+      font-size: 30px;
+      text-shadow: 0 0 12px rgba(106,76,255,0.4);
       margin-bottom: 25px;
     }
 
     .card {
-      background: #111827;
-      padding: 15px;
-      border-radius: 12px;
-      margin-bottom: 18px;
-      box-shadow: 0 0 12px rgba(0,255,255,0.20);
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(10px);
+      padding: 18px;
+      border-radius: 20px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      margin-bottom: 22px;
     }
 
     .card h2 {
       margin: 0;
-      font-size: 18px;
-      color: #00eaff;
+      font-size: 20px;
+      font-weight: bold;
+      color: #6a4cff;
     }
 
     .value {
-      font-size: 26px;
+      font-size: 22px;
+      margin-top: 6px;
       font-weight: bold;
-      margin-top: 8px;
-      color: #fff;
+      color: #333;
     }
 
     table {
       width: 100%;
+      margin-top: 20px;
       border-collapse: collapse;
-      margin-top: 25px;
-      background: #111827;
-    }
-
-    th, td {
-      padding: 10px;
-      border-bottom: 1px solid #333;
+      background: rgba(255,255,255,0.75);
+      border-radius: 12px;
+      overflow: hidden;
     }
 
     th {
-      background: #1f2937;
-      color: #00eaff;
+      background: #d7d2fe;
+      padding: 10px;
+      color: #4a3cd1;
+      font-size: 16px;
+    }
+
+    td {
+      padding: 10px;
+      border-bottom: 1px solid #eee;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -78,13 +94,17 @@
 
 <div class="card">
   <h2>Müşteri Analitiği</h2>
+
   <p class="value">Yeni Müşteri: <span id="yeniTop">0</span></p>
   <p class="value">Satın Alan: <span id="satinTop">0</span></p>
-  <p class="value">Conversion Rate: <span id="cr">0%</span></p>
+  <p class="value">Satın Alma Oranı: <span id="cr">0%</span></p>
+
   <p class="value">Durdurulan: <span id="durdurTop">0</span></p>
-  <p class="value">Stopper Success: <span id="ssr">0%</span></p>
-  <p class="value">Davet → Satın Alan: <span id="davetsatinTop">0</span></p>
-  <p class="value">Invite Conversion: <span id="icr">0%</span></p>
+  <p class="value">Durdurma Başarısı: <span id="ssr">0%</span></p>
+
+  <p class="value">Davet Edilen: <span id="davetTop">0</span></p>
+  <p class="value">Davet → Satış Alan: <span id="davetsatinTop">0</span></p>
+  <p class="value">Davet Başarısı: <span id="icr">0%</span></p>
 </div>
 
 <div class="card">
@@ -97,7 +117,7 @@
   <canvas id="fokusChart"></canvas>
 </div>
 
-<h2 style="margin-top:35px;color:#00eaff;">📄 Günlük Kayıtlar</h2>
+<h2 style="margin-top:35px;color:#6a4cff;">📄 Günlük Kayıtlar</h2>
 
 <table>
   <tr>
@@ -217,6 +237,7 @@
     document.getElementById("yeniTop").innerText = yeniTop;
     document.getElementById("satinTop").innerText = satinTop;
     document.getElementById("durdurTop").innerText = durdurTop;
+    document.getElementById("davetTop").innerText = davetTop;
     document.getElementById("davetsatinTop").innerText = davetsatinTop;
 
     let cr = (satinTop / yeniTop) * 100 || 0;
@@ -237,7 +258,7 @@
         datasets: [{
           label: "Günlük Ciro",
           data: ciroValues,
-          borderColor: "#00eaff",
+          borderColor: "#6a4cff",
           borderWidth: 3
         }]
       }
@@ -248,9 +269,9 @@
       data: {
         labels: labels,
         datasets: [
-          { label: settings.fokus1_ad, data: data.map(x => x.fokus1), borderColor: "#31ff6a" },
-          { label: settings.fokus2_ad, data: data.map(x => x.fokus2), borderColor: "#ff6bff" },
-          { label: settings.fokus3_ad, data: data.map(x => x.fokus3), borderColor: "#ffaa31" }
+          { label: settings.fokus1_ad, data: data.map(x => x.fokus1), borderColor: "#ff7edb" },
+          { label: settings.fokus2_ad, data: data.map(x => x.fokus2), borderColor: "#7edfff" },
+          { label: settings.fokus3_ad, data: data.map(x => x.fokus3), borderColor: "#ffce7e" }
         ]
       }
     });
