@@ -33,5 +33,46 @@
     </div>
 
     <script src="script.js"></script>
+    <script type="module">
+  // Firebase SDK'yı CDN üzerinden import et
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs } 
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+  // Senin Firebase yapılandırman
+  const firebaseConfig = {
+    apiKey: "AIzaSyBgh7QT9ORiww11m78X0GxaoPaU_kGB07E",
+    authDomain: "estee-lauder-app.firebaseapp.com",
+    projectId: "estee-lauder-app",
+    storageBucket: "estee-lauder-app.firebasestorage.app",
+    messagingSenderId: "585743636422",
+    appId: "1:585743636422:web:cb7094f89a04ad6deb84c7"
+  };
+
+  // Firebase'i başlat
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  // ÖRNEK: Veritabanına veri kaydetme fonksiyonu
+  async function saveData(data) {
+    await addDoc(collection(db, "veriler"), data);
+    console.log("Veri kaydedildi:", data);
+  }
+
+  // ÖRNEK: Veritabanından veri çekme fonksiyonu
+  async function loadData() {
+    const querySnapshot = await getDocs(collection(db, "veriler"));
+    let result = [];
+    querySnapshot.forEach((doc) => {
+      result.push(doc.data());
+    });
+    console.log("Veriler:", result);
+    return result;
+  }
+
+  // Bu fonksiyonları global yap (HTML butonlarından çağırmak için)
+  window.saveData = saveData;
+  window.loadData = loadData;
+</script>
 </body>
 </html>
