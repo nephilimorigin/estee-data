@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ayı Başlat - Satış Hedef Ayarları</title>
+
+  <style>
+    body {
+      background: #0b0f17;
+      font-family: Arial, sans-serif;
+      color: white;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #00eaff;
+      text-shadow: 0 0 10px #00eaff;
+    }
+
+    .card {
+      background: #111827;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 12px;
+      box-shadow: 0 0 15px rgba(0, 234, 255, 0.2);
+    }
+
+    label {
+      font-weight: bold;
+      margin-top: 12px;
+      display: block;
+    }
+
+    input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: none;
+      background: #1f2937;
+      color: white;
+    }
+
+    button {
+      width: 100%;
+      background: #00eaff;
+      padding: 14px;
+      border: none;
+      border-radius: 10px;
+      font-size: 18px;
+      margin-top: 20px;
+      color: black;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    #successMsg {
+      display: none;
+      margin-top: 20px;
+      color: #31ff6a;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+<h1>📅 Ayı Başlat</h1>
+
+<div class="card">
+  <h3>Aylık Ciro Hedefi</h3>
+  <label>Ciro Hedefi (TL)</label>
+  <input type="number" id="ciroHedef" placeholder="Örn: 100000">
+</div>
+
+<div class="card">
+  <h3>Fokus Ürün 1</h3>
+  <label>Fokus 1 Adı</label>
+  <input type="text" id="f1_ad">
+
+  <label>Fokus 1 Aylık Hedef Adedi</label>
+  <input type="number" id="f1_hedef">
+</div>
+
+<div class="card">
+  <h3>Fokus Ürün 2</h3>
+  <label>Fokus 2 Adı</label>
+  <input type="text" id="f2_ad">
+
+  <label>Fokus 2 Aylık Hedef Adedi</label>
+  <input type="number" id="f2_hedef">
+</div>
+
+<div class="card">
+  <h3>Fokus Ürün 3</h3>
+  <label>Fokus 3 Adı</label>
+  <input type="text" id="f3_ad">
+
+  <label>Fokus 3 Aylık Hedef Adedi</label>
+  <input type="number" id="f3_hedef">
+</div>
+
+<div class="card">
+  <h3>Tarih Aralığı</h3>
+  <label>Başlangıç Tarihi</label>
+  <input type="date" id="baslangic">
+
+  <label>Bitiş Tarihi</label>
+  <input type="date" id="bitis">
+</div>
+
+<button id="saveBtn">📌 Ayı Başlat</button>
+
+<p id="successMsg">✔ Ay ayarları kaydedildi!</p>
+
+<script type="module">
+
+  import { initializeApp }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+
+  import { getFirestore, collection, addDoc }
+    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBgh7QT9ORiww11m78X0GxaoPaU_kGB07E",
+    authDomain: "estee-lauder-app.firebaseapp.com",
+    projectId: "estee-lauder-app",
+    storageBucket: "estee-lauder-app.firebasestorage.app",
+    messagingSenderId: "585743636422",
+    appId: "1:585743636422:web:cb7094f89a04ad6deb84c7"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+
+  document.getElementById("saveBtn").addEventListener("click", async () => {
+
+    const data = {
+      ciroHedef: Number(document.getElementById("ciroHedef").value),
+
+      fokus1_ad: document.getElementById("f1_ad").value,
+      fokus1_hedef: Number(document.getElementById("f1_hedef").value),
+
+      fokus2_ad: document.getElementById("f2_ad").value,
+      fokus2_hedef: Number(document.getElementById("f2_hedef").value),
+
+      fokus3_ad: document.getElementById("f3_ad").value,
+      fokus3_hedef: Number(document.getElementById("f3_hedef").value),
+
+      baslangic: document.getElementById("baslangic").value,
+      bitis: document.getElementById("bitis").value,
+
+      createdAt: new Date().toISOString().split("T")[0]
+    };
+
+    await addDoc(collection(db, "settings"), data);
+
+    document.getElementById("successMsg").style.display = "block";
+  });
+
+</script>
+
+</body>
+</html>
