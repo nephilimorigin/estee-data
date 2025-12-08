@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
   <title>Dashboard</title>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -15,98 +15,58 @@
       font-family: Arial;
       padding: 20px;
       margin: 0;
-      background: linear-gradient(135deg, #e1eafe, #f7d9e8, #d9f7f1);
+      background: linear-gradient(135deg,#e1eafe,#f7d9e8,#d9f7f1);
       background-size: 300% 300%;
       animation: bgMove 10s ease infinite;
       color: #444;
     }
     @keyframes bgMove {
-      0% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
-      100% { background-position: 0% 50%; }
+      0% { background-position:0% 50%; }
+      50% { background-position:100% 50%; }
+      100% { background-position:0% 50%; }
     }
 
     .top-nav {
-      display: flex;
-      justify-content: space-around;
-      background: rgba(255,255,255,0.7);
-      backdrop-filter: blur(10px);
-      padding: 12px;
-      border-radius: 16px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+      display:flex;
+      justify-content:space-around;
+      background:rgba(255,255,255,0.7);
+      backdrop-filter:blur(10px);
+      padding:12px;
+      border-radius:16px;
+      margin-bottom:20px;
+      box-shadow:0 4px 15px rgba(0,0,0,0.08);
     }
     .top-nav a {
-      text-decoration: none;
-      font-weight: 600;
-      color: #4b3f72;
-      font-size: 16px;
+      text-decoration:none;
+      font-weight:600;
+      color:#4b3f72;
+      font-size:16px;
     }
 
-    h1 {
-      text-align: center;
-      color: #6a4cff;
-      text-shadow: 0 0 12px rgba(106,76,255,0.4);
-    }
+    h1 { text-align:center; color:#6a4cff; text-shadow:0 0 12px rgba(106,76,255,0.4); }
 
     .card {
-      background: rgba(255,255,255,0.7);
-      backdrop-filter: blur(10px);
-      padding: 18px;
-      border-radius: 20px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-      margin-bottom: 22px;
+      background:rgba(255,255,255,0.7);
+      backdrop-filter:blur(10px);
+      padding:18px;
+      border-radius:20px;
+      box-shadow:0 4px 20px rgba(0,0,0,0.1);
+      margin-bottom:22px;
     }
-
-    .value { font-size: 20px; font-weight: bold; margin-top: 5px; }
-
-    .progress-wrap {
-      width: 100%;
-      background: #eee;
-      height: 22px;
-      border-radius: 14px;
-      overflow: hidden;
-      margin: 12px 0 15px 0;
-    }
-
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #b395ff, #ff9ce8, #a0e9ff);
-      transition: width .6s ease;
-      border-radius: 14px;
-    }
+    .value { font-size:20px; font-weight:bold; margin-top:5px; }
 
     .delete-btn {
-      background: #ff4a4a;
-      border: none;
-      padding: 7px 12px;
-      color: white;
-      border-radius: 6px;
-      cursor: pointer;
-      font-size: 13px;
+      background:#ff4a4a; border:none; padding:8px 12px;
+      color:white; border-radius:6px; cursor:pointer; font-size:13px;
     }
 
     table {
-      width: 100%;
-      border-collapse: collapse;
-      border-radius: 12px;
-      overflow: hidden;
-      background: rgba(255,255,255,0.85);
-      margin-top: 20px;
+      width:100%; border-collapse:collapse;
+      background:rgba(255,255,255,0.75);
+      border-radius:12px; overflow:hidden;
     }
-
-    th {
-      background: #d7d2fe;
-      padding: 10px;
-      font-size: 16px;
-    }
-
-    td {
-      padding: 10px;
-      border-bottom: 1px solid #eee;
-      font-size: 14px;
-    }
+    th { background:#d7d2fe; padding:10px; }
+    td { padding:10px; border-bottom:1px solid #eee; }
   </style>
 </head>
 
@@ -120,7 +80,7 @@
 
 <h1>📊 Aylık Dashboard</h1>
 
-<!-- AYLIK PERFORMANS -->
+<!-- 🔵 AYLIK CİRO -->
 <div class="card">
   <h2>Aylık Ciro Performansı</h2>
   <p class="value">Hedef: <span id="ciroHedef">0</span></p>
@@ -129,143 +89,134 @@
   <p class="value">Günlük Gerekli: <span id="ciroGunluk">0</span></p>
 </div>
 
-<!-- İLERLEME KUTUSU -->
+<!-- 🔵 HEDEF İLERLEME -->
 <div class="card">
   <h2>🎯 Hedef İlerleme</h2>
   <p class="value">Genel Başarı: <span id="basariYuzde">0%</span></p>
-
-  <div class="progress-wrap">
-    <div id="progressBar" class="progress-bar"></div>
+  <div style="background:#eee;height:10px;border-radius:10px;">
+    <div id="progressBar" style="height:10px;border-radius:10px;background:linear-gradient(90deg,#ff9a9e,#a1c4fd);width:0%;"></div>
   </div>
-
   <p class="value">%80'e kalan: <span id="barem80">0</span></p>
-  <p class="value">%90'e kalan: <span id="barem90">0</span></p>
+  <p class="value">%90'a kalan: <span id="barem90">0</span></p>
   <p class="value">%100'e kalan: <span id="barem100">0</span></p>
   <p class="value">%110'e kalan: <span id="barem110">0</span></p>
 </div>
 
-<!-- TABLO -->
-<h2 style="margin-top:35px;color:#6a4cff;">📄 Günlük Kayıtlar</h2>
+<!-- 🔵 MÜŞTERİ ANALİTİĞİ -->
+<div class="card">
+  <h2>👥 Müşteri Analitiği</h2>
+  <p class="value">Yeni Müşteri: <span id="yeniTop">0</span></p>
+  <p class="value">Satın Alan: <span id="satinTop">0</span></p>
+  <p class="value">Satın Alma Oranı (CR): <span id="cr">0%</span></p>
+  <p class="value">Durdurulan: <span id="durdurTop">0</span></p>
+  <p class="value">Durdurma Başarısı (SSR): <span id="ssr">0%</span></p>
+  <p class="value">Davet Edilen: <span id="davetTop">0</span></p>
+  <p class="value">Davet → Satış Alan: <span id="davetsatinTop">0</span></p>
+  <p class="value">Davet Başarısı (ICR): <span id="icr">0%</span></p>
+</div>
+
+<h2 style="color:#6a4cff;margin-top:30px;">📄 Günlük Kayıtlar</h2>
 
 <table>
   <tr>
     <th>Tarih</th>
     <th>Ciro</th>
-    <th>F1</th>
-    <th>F2</th>
-    <th>F3</th>
+    <th>Yeni</th>
+    <th>Satın</th>
+    <th>Durdur</th>
+    <th>Davet</th>
+    <th>Davet Satın</th>
     <th>Not</th>
     <th>Sil</th>
   </tr>
   <tbody id="dataTable"></tbody>
 </table>
 
-<!-- GRAFİKLER -->
-<div class="card">
-  <h2>Günlük Ciro Grafiği</h2>
-  <canvas id="ciroChart"></canvas>
-</div>
-
-<div class="card">
-  <h2>Fokus Ürün Grafikleri</h2>
-  <canvas id="fokusChart"></canvas>
-</div>
-
 <script type="module">
-import {
-  numberToTL, loadMonthlyStats, loadDailyAll, deleteRecord
-} from "./common.js";
+import { numberToTL, loadMonthlyStats, loadDailyAll, deleteRecord } from "./common.js";
 
-function sum(arr, key) {
-  return arr.reduce((t, x) => t + Number(x[key] || 0), 0);
-}
-
-function renderTable(list) {
+function renderTable(data) {
   const tbody = document.getElementById("dataTable");
   tbody.innerHTML = "";
 
-  list.forEach(row => {
+  data.forEach(row => {
     tbody.innerHTML += `
-    <tr>
-      <td>${row.tarih}</td>
-      <td>${numberToTL(row.ciro)}</td>
-      <td>${row.fokus1 || 0}</td>
-      <td>${row.fokus2 || 0}</td>
-      <td>${row.fokus3 || 0}</td>
-      <td>${row.not || ""}</td>
-      <td><button class="delete-btn" onclick="deleteRow('${row.id}')">Sil</button></td>
-    </tr>`;
+      <tr>
+        <td>${row.tarih}</td>
+        <td>${numberToTL(row.ciro)}</td>
+        <td>${row.yeni || 0}</td>
+        <td>${row.satin || 0}</td>
+        <td>${row.durdurulan || 0}</td>
+        <td>${row.davet || 0}</td>
+        <td>${row.davetsatin || 0}</td>
+        <td>${row.not || ""}</td>
+        <td><button class="delete-btn" onclick="deleteRow('${row.id}')">Sil</button></td>
+      </tr>
+    `;
   });
 }
 
-window.deleteRow = async function(id) {
+window.deleteRow = async (id) => {
   if (confirm("Bu kaydı silmek istiyor musun?")) {
     await deleteRecord(id);
     location.reload();
   }
 };
 
-async function main() {
-  const stats = await loadMonthlyStats();
-  const data = await loadDailyAll();
+function sum(arr, key) {
+  return arr.reduce((t, x) => t + Number(x[key] || 0), 0);
+}
 
+async function main() {
+  const settings = (await loadMonthlyStats()) || {};
+  const data = await loadDailyAll();
   renderTable(data);
 
-  const toplam = sum(data, "ciro");
-  const hedef = Number(stats?.monthlyGoal || 0);
-  const kalan = hedef - toplam;
+  // 🔵 CİRO ANALİZİ
+  const toplamCiro = sum(data, "ciro");
+  const hedef = Number(settings.monthlyGoal || 0);
+  const kalan = hedef - toplamCiro;
 
   const now = new Date();
-  const today = now.getDate();
-  const totalDays = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
-  const remainingDays = Math.max(1, totalDays - today + 1);
-
+  const totalDays = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
+  const remainingDays = Math.max(1, totalDays - now.getDate() + 1);
   const gunluk = hedef === 0 ? 0 : kalan / remainingDays;
 
   document.getElementById("ciroHedef").innerText = numberToTL(hedef);
-  document.getElementById("ciroYapilan").innerText = numberToTL(toplam);
+  document.getElementById("ciroYapilan").innerText = numberToTL(toplamCiro);
   document.getElementById("ciroKalan").innerText = numberToTL(kalan);
   document.getElementById("ciroGunluk").innerText = numberToTL(gunluk);
 
-  const basari = hedef === 0 ? 0 : (toplam / hedef) * 100;
+  const basari = hedef === 0 ? 0 : (toplamCiro / hedef) * 100;
   document.getElementById("basariYuzde").innerText = basari.toFixed(1) + "%";
-  document.getElementById("progressBar").style.width = Math.min(basari, 110) + "%";
+  document.getElementById("progressBar").style.width = Math.min(basari,110) + "%";
 
-  document.getElementById("barem80").innerText =
-    numberToTL(Math.max(0, hedef * 0.8 - toplam));
-  document.getElementById("barem90").innerText =
-    numberToTL(Math.max(0, hedef * 0.9 - toplam));
-  document.getElementById("barem100").innerText =
-    numberToTL(Math.max(0, hedef - toplam));
-  document.getElementById("barem110").innerText =
-    numberToTL(Math.max(0, hedef * 1.1 - toplam));
+  document.getElementById("barem80").innerText = numberToTL(Math.max(0, hedef*0.8 - toplamCiro));
+  document.getElementById("barem90").innerText = numberToTL(Math.max(0, hedef*0.9 - toplamCiro));
+  document.getElementById("barem100").innerText = numberToTL(Math.max(0, hedef - toplamCiro));
+  document.getElementById("barem110").innerText = numberToTL(Math.max(0, hedef*1.1 - toplamCiro));
 
-  // --- CİRO GRAFİĞİ ---
-  new Chart(document.getElementById("ciroChart"), {
-    type: "line",
-    data: {
-      labels: data.map(x => x.tarih),
-      datasets: [{
-        label: "Günlük Ciro",
-        data: data.map(x => x.ciro),
-        borderColor: "#6a4cff",
-        borderWidth: 3
-      }]
-    }
-  });
+  // 🔵 MÜŞTERİ ANALİTİĞİ
+  const yeniTop = sum(data, "yeni");
+  const satinTop = sum(data, "satin");
+  const durdurTop = sum(data, "durdurulan");
+  const davetTop = sum(data, "davet");
+  const davetsatinTop = sum(data, "davetsatin");
 
-  // --- FOKUS GRAFİĞİ ---
-  new Chart(document.getElementById("fokusChart"), {
-    type: "line",
-    data: {
-      labels: data.map(x => x.tarih),
-      datasets: [
-        { label: "Fokus1", data: data.map(x => x.fokus1 || 0), borderColor: "#ff7edb" },
-        { label: "Fokus2", data: data.map(x => x.fokus2 || 0), borderColor: "#7edfff" },
-        { label: "Fokus3", data: data.map(x => x.fokus3 || 0), borderColor: "#ffce7e" }
-      ]
-    }
-  });
+  document.getElementById("yeniTop").innerText = yeniTop;
+  document.getElementById("satinTop").innerText = satinTop;
+  document.getElementById("durdurTop").innerText = durdurTop;
+  document.getElementById("davetTop").innerText = davetTop;
+  document.getElementById("davetsatinTop").innerText = davetsatinTop;
+
+  document.getElementById("cr").innerText =
+    ((satinTop / (yeniTop || 1)) * 100).toFixed(1) + "%";
+
+  document.getElementById("ssr").innerText =
+    ((satinTop / (durdurTop || 1)) * 100).toFixed(1) + "%";
+
+  document.getElementById("icr").innerText =
+    ((davetsatinTop / (davetTop || 1)) * 100).toFixed(1) + "%";
 }
 
 main();
