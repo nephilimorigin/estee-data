@@ -9,7 +9,7 @@ import {
   collection, addDoc, getDocs, deleteDoc
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
-// Firebase yapılandırma
+// Firebase Yapılandırma
 export const firebaseConfig = {
   apiKey: "AIzaSyBgh7QT9ORiww11m78X0GxaoPaU_kGB07E",
   authDomain: "estee-lauder-app.firebaseapp.com",
@@ -23,23 +23,23 @@ export const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 
 // ========================
-//  PARA FORMAT FONKSİYONLARI
+// PARA FORMAT FONKSİYONLARI
 // ========================
 
-// 1) Girilen değeri TL formatında yazdır (örn: "10000" → "10.000")
+// Canlı TL formatı
 export function formatTLLive(value) {
   value = value.replace(/\D/g, "");
   if (value === "") return "";
   return new Intl.NumberFormat("tr-TR").format(Number(value));
 }
 
-// 2) TL formatlı metni sayıya dönüştür (Firestore kaydı için)
+// TL → Number
 export function TLtoNumber(value) {
   if (!value) return 0;
   return Number(value.replace(/\./g, "").replace(",", "."));
 }
 
-// 3) Sayıyı TL formatına dönüştür (Dashboard gösterimi)
+// Number → TL
 export function numberToTL(num) {
   return new Intl.NumberFormat("tr-TR", {
     minimumFractionDigits: 0,
@@ -48,37 +48,33 @@ export function numberToTL(num) {
 }
 
 // ========================
-//  FIRESTORE YARDIMCI FONKSİYONLARI
+// FIRESTORE FONKSİYONLARI
 // ========================
-
-// ---- AYLIK HEDEF ----
 
 // Aylık hedefi kaydet
 export async function saveMonthlyStats(data) {
   await setDoc(doc(db, "monthlyStats", "current"), data);
 }
 
-// Aylık hedefi getir
+// Aylık hedefi yükle
 export async function loadMonthlyStats() {
   const snap = await getDoc(doc(db, "monthlyStats", "current"));
   return snap.exists() ? snap.data() : null;
 }
 
-// ---- GÜNLÜK VERİ ----
-
-// Günlük veriyi Firestore'a kaydet
+// Günlük veriyi kaydet
 export async function saveDaily(data) {
   await addDoc(collection(db, "daily"), data);
 }
 
-// Firestore'dan tüm günlük verileri çek (ID dahil)
+// Günlük verileri ID ile birlikte çek
 export async function loadDailyAll() {
   const snap = await getDocs(collection(db, "daily"));
   let arr = [];
 
   snap.forEach(d => {
     arr.push({
-      id: d.id,     // → silme butonu için gerekli
+      id: d.id,  // silme için gerekli
       ...d.data()
     });
   });
@@ -86,7 +82,7 @@ export async function loadDailyAll() {
   return arr;
 }
 
-// Günlük veriyi sil
+// Günlük kaydı sil
 export async function deleteRecord(id) {
   await deleteDoc(doc(db, "daily", id));
 }
