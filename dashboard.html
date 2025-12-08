@@ -6,6 +6,7 @@
   <title>Dashboard</title>
 
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script type="module" src="./common.js"></script>
 
   <style>
     * { box-sizing: border-box; }
@@ -19,7 +20,6 @@
       animation: bgMove 10s ease infinite;
       color: #444;
     }
-
     @keyframes bgMove {
       0% { background-position: 0% 50%; }
       50% { background-position: 100% 50%; }
@@ -27,7 +27,6 @@
     }
 
     .top-nav {
-      width: 100%;
       display: flex;
       justify-content: space-around;
       background: rgba(255,255,255,0.7);
@@ -37,20 +36,17 @@
       margin-bottom: 20px;
       box-shadow: 0 4px 15px rgba(0,0,0,0.08);
     }
-
     .top-nav a {
       text-decoration: none;
-      font-size: 16px;
       font-weight: 600;
       color: #4b3f72;
+      font-size: 16px;
     }
 
     h1 {
       text-align: center;
       color: #6a4cff;
-      font-size: 30px;
       text-shadow: 0 0 12px rgba(106,76,255,0.4);
-      margin-bottom: 25px;
     }
 
     .card {
@@ -62,57 +58,35 @@
       margin-bottom: 22px;
     }
 
-    .card h2 {
-      margin: 0;
-      font-size: 20px;
-      font-weight: bold;
-      color: #6a4cff;
-    }
+    .value { font-size: 20px; font-weight: bold; margin-top: 5px; }
 
-    .value {
-      font-size: 22px;
-      margin-top: 6px;
-      font-weight: bold;
-      color: #333;
-    }
-
-    .progress-wrap {
-      width: 100%;
-      background: #eee;
-      height: 22px;
-      border-radius: 14px;
-      overflow: hidden;
-      margin: 12px 0 15px 0;
-    }
-
-    .progress-bar {
-      height: 100%;
-      width: 0%;
-      background: linear-gradient(90deg, #b395ff, #ff9ce8, #a0e9ff);
-      transition: width .6s ease;
-      border-radius: 14px;
+    .delete-btn {
+      background: #ff4a4a;
+      border: none;
+      padding: 8px 12px;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 13px;
     }
 
     table {
       width: 100%;
-      margin-top: 20px;
       border-collapse: collapse;
-      background: rgba(255,255,255,0.75);
       border-radius: 12px;
       overflow: hidden;
+      background: rgba(255,255,255,0.75);
+      margin-top: 20px;
     }
 
     th {
       background: #d7d2fe;
       padding: 10px;
-      color: #4a3cd1;
-      font-size: 16px;
     }
 
     td {
       padding: 10px;
       border-bottom: 1px solid #eee;
-      font-size: 14px;
     }
   </style>
 </head>
@@ -144,31 +118,7 @@
   <p class="value">%80'e kalan: <span id="barem80">0</span></p>
   <p class="value">%90'a kalan: <span id="barem90">0</span></p>
   <p class="value">%100'e kalan: <span id="barem100">0</span></p>
-  <p class="value">%110'a kalan: <span id="barem110">0</span></p>
-</div>
-
-<div id="fokusContainer"></div>
-
-<div class="card">
-  <h2>Müşteri Analitiği</h2>
-  <p class="value">Yeni Müşteri: <span id="yeniTop">0</span></p>
-  <p class="value">Satın Alan: <span id="satinTop">0</span></p>
-  <p class="value">Satın Alma Oranı: <span id="cr">0%</span></p>
-  <p class="value">Durdurulan: <span id="durdurTop">0</span></p>
-  <p class="value">Durdurma Başarısı: <span id="ssr">0%</span></p>
-  <p class="value">Davet Edilen: <span id="davetTop">0</span></p>
-  <p class="value">Davet → Satış Alan: <span id="davetsatinTop">0</span></p>
-  <p class="value">Davet Başarısı: <span id="icr">0%</span></p>
-</div>
-
-<div class="card">
-  <h2>Günlük Ciro Grafiği</h2>
-  <canvas id="ciroChart"></canvas>
-</div>
-
-<div class="card">
-  <h2>Fokus Ürün Grafikleri</h2>
-  <canvas id="fokusChart"></canvas>
+  <p class="value">%110'e kalan: <span id="barem110">0</span></p>
 </div>
 
 <h2 style="margin-top:35px;color:#6a4cff;">📄 Günlük Kayıtlar</h2>
@@ -177,184 +127,84 @@
   <tr>
     <th>Tarih</th>
     <th>Ciro</th>
-    <th>Fokus1</th>
-    <th>Fokus2</th>
-    <th>Fokus3</th>
+    <th>F1</th>
+    <th>F2</th>
+    <th>F3</th>
     <th>Not</th>
+    <th>Sil</th>
   </tr>
   <tbody id="dataTable"></tbody>
 </table>
 
 <script type="module">
-import {
-  numberToTL,
-  loadMonthlyStats,
-  loadDailyAll
-} from "./common.js";
+import { numberToTL, loadMonthlyStats, loadDailyAll, deleteRecord } from "./common.js";
 
-/* TABLO */
-function fillTable(data) {
+function renderTable(data) {
   const tbody = document.getElementById("dataTable");
   tbody.innerHTML = "";
-  data.forEach(x => {
+  data.forEach(row => {
     tbody.innerHTML += `
       <tr>
-        <td>${x.tarih}</td>
-        <td>${numberToTL(x.ciro)} TL</td>
-        <td>${x.fokus1 || 0}</td>
-        <td>${x.fokus2 || 0}</td>
-        <td>${x.fokus3 || 0}</td>
-        <td>${x.not || ""}</td>
+        <td>${row.tarih}</td>
+        <td>${numberToTL(row.ciro)}</td>
+        <td>${row.fokus1 || 0}</td>
+        <td>${row.fokus2 || 0}</td>
+        <td>${row.fokus3 || 0}</td>
+        <td>${row.not || ""}</td>
+        <td><button class="delete-btn" onclick="deleteRow('${row.id}')">Sil</button></td>
       </tr>
     `;
   });
 }
 
+window.deleteRow = async function(id) {
+  if (confirm("Bu kaydı silmek istediğine emin misin?")) {
+    await deleteRecord(id);
+    location.reload();
+  }
+};
+
 function sum(arr, key) {
   return arr.reduce((t, x) => t + Number(x[key] || 0), 0);
-}
-
-function fokusCard(ad, hedef, satilan) {
-  const safeHedef = Number(hedef || 0);
-  const safeSatilan = Number(satilan || 0);
-  const kalan = safeHedef - safeSatilan;
-  const gunluk = safeHedef === 0 ? 0 : kalan / 30;
-
-  return `
-    <div class="card">
-      <h2>${ad}</h2>
-      <p class="value">Hedef: ${safeHedef}</p>
-      <p class="value">Satılan: ${safeSatilan}</p>
-      <p class="value">Kalan: ${kalan}</p>
-      <p class="value">Günlük Gerekli: ${gunluk.toFixed(1)}</p>
-    </div>
-  `;
 }
 
 async function main() {
   const settings = (await loadMonthlyStats()) || {};
   const data = await loadDailyAll();
-
-  fillTable(data);
+  renderTable(data);
 
   const toplamCiro = sum(data, "ciro");
   const hedef = Number(settings.monthlyGoal || 0);
   const kalan = hedef - toplamCiro;
-  const gunluk = hedef === 0 ? 0 : kalan / 30;
 
-  document.getElementById("ciroHedef").innerText = numberToTL(hedef) + " TL";
-  document.getElementById("ciroYapilan").innerText = numberToTL(toplamCiro) + " TL";
-  document.getElementById("ciroKalan").innerText = numberToTL(kalan) + " TL";
-  document.getElementById("ciroGunluk").innerText = numberToTL(gunluk) + " TL";
+  // DOĞRU GÜNLÜK HESAP
+  const now = new Date();
+  const today = now.getDate();
+  const totalDays = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
+  const remainingDays = Math.max(1, totalDays - today + 1);
+  const gunluk = hedef === 0 ? 0 : kalan / remainingDays;
+
+  document.getElementById("ciroHedef").innerText = numberToTL(hedef);
+  document.getElementById("ciroYapilan").innerText = numberToTL(toplamCiro);
+  document.getElementById("ciroKalan").innerText = numberToTL(kalan);
+  document.getElementById("ciroGunluk").innerText = numberToTL(gunluk);
 
   const basari = hedef === 0 ? 0 : (toplamCiro / hedef) * 100;
   document.getElementById("basariYuzde").innerText = basari.toFixed(1) + "%";
   document.getElementById("progressBar").style.width = Math.min(basari, 110) + "%";
 
   document.getElementById("barem80").innerText =
-    numberToTL(Math.max(0, hedef * 0.8 - toplamCiro)) + " TL";
+    numberToTL(Math.max(0, hedef * 0.8 - toplamCiro));
   document.getElementById("barem90").innerText =
-    numberToTL(Math.max(0, hedef * 0.9 - toplamCiro)) + " TL";
+    numberToTL(Math.max(0, hedef * 0.9 - toplamCiro));
   document.getElementById("barem100").innerText =
-    numberToTL(Math.max(0, hedef - toplamCiro)) + " TL";
+    numberToTL(Math.max(0, hedef - toplamCiro));
   document.getElementById("barem110").innerText =
-    numberToTL(Math.max(0, hedef * 1.1 - toplamCiro)) + " TL";
-
-  // Fokus isim / hedefleri güvenli çek
-  const f1Name = settings.fokus1_ad || "Fokus 1";
-  const f2Name = settings.fokus2_ad || "Fokus 2";
-  const f3Name = settings.fokus3_ad || "Fokus 3";
-
-  const f1Goal = Number(settings.fokus1_hedef || 0);
-  const f2Goal = Number(settings.fokus2_hedef || 0);
-  const f3Goal = Number(settings.fokus3_hedef || 0);
-
-  const f1Sold = sum(data, "fokus1");
-  const f2Sold = sum(data, "fokus2");
-  const f3Sold = sum(data, "fokus3");
-
-  document.getElementById("fokusContainer").innerHTML =
-    fokusCard(f1Name, f1Goal, f1Sold) +
-    fokusCard(f2Name, f2Goal, f2Sold) +
-    fokusCard(f3Name, f3Goal, f3Sold);
-
-  // Müşteri analitiği
-  const yeniTop = sum(data, "yeni");
-  const satinTop = sum(data, "satin");
-  const durdurTop = sum(data, "durdurulan");
-  const davetTop = sum(data, "davet");
-  const davetsatinTop = sum(data, "davetsatin");
-
-  document.getElementById("yeniTop").innerText = yeniTop;
-  document.getElementById("satinTop").innerText = satinTop;
-  document.getElementById("durdurTop").innerText = durdurTop;
-  document.getElementById("davetTop").innerText = davetTop;
-  document.getElementById("davetsatinTop").innerText = davetsatinTop;
-
-  document.getElementById("cr").innerText = ((satinTop / (yeniTop || 1)) * 100).toFixed(1) + "%";
-  document.getElementById("ssr").innerText = ((satinTop / (durdurTop || 1)) * 100).toFixed(1) + "%";
-  document.getElementById("icr").innerText = ((davetsatinTop / (davetTop || 1)) * 100).toFixed(1) + "%";
-
-  // Ciro grafiği
-  new Chart(document.getElementById("ciroChart"), {
-    type: "line",
-    data: {
-      labels: data.map(x => x.tarih),
-      datasets: [{
-        label: "Günlük Ciro",
-        data: data.map(x => x.ciro),
-        borderColor: "#6a4cff",
-        borderWidth: 3
-      }]
-    }
-  });
-
-  // Fokus grafiği
-  new Chart(document.getElementById("fokusChart"), {
-    type: "line",
-    data: {
-      labels: data.map(x => x.tarih),
-      datasets: [
-        { label: f1Name, data: data.map(x => x.fokus1 || 0), borderColor: "#ff7edb" },
-        { label: f2Name, data: data.map(x => x.fokus2 || 0), borderColor: "#7edfff" },
-        { label: f3Name, data: data.map(x => x.fokus3 || 0), borderColor: "#ffce7e" }
-      ]
-    }
-  });
+    numberToTL(Math.max(0, hedef * 1.1 - toplamCiro));
 }
 
 main();
-
-// EXCEL EXPORT
-document.getElementById("exportBtn")?.addEventListener("click", async () => {
-  const data = await loadDailyAll();
-
-  if (data.length === 0) {
-    alert("Hiç veri yok!");
-    return;
-  }
-
-  const headers = Object.keys(data[0]);
-  let csv = headers.join(",") + "\n";
-
-  data.forEach(row => {
-    const values = headers.map(h => row[h]);
-    csv += values.join(",") + "\n";
-  });
-
-  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "estee-data.csv";
-  a.click();
-});
 </script>
-
-<button id="exportBtn" style="margin: 20px; padding:10px 15px;">
-    Verileri Excel Olarak İndir
-</button>
 
 </body>
 </html>
