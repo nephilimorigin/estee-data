@@ -3,227 +3,70 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ayi Başlat</title>
+  <title>Ayı Başlat</title>
 
   <style>
-    * { box-sizing: border-box; }
-
     body {
       background: linear-gradient(135deg, #f3e7ff, #d6ecff);
       font-family: Arial;
       padding: 20px;
-      color: #4a4a4a;
       margin: 0;
     }
-
-    .top-nav {
-      width: 100%;
-      display: flex;
-      justify-content: space-around;
-      background: rgba(255,255,255,0.7);
-      backdrop-filter: blur(10px);
-      padding: 12px;
-      border-radius: 16px;
-      margin-bottom: 20px;
-      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-    }
-
-    .top-nav a {
-      text-decoration: none;
-      font-size: 16px;
-      font-weight: 600;
-      color: #4b3f72;
-    }
-
-    h1 {
-      text-align: center;
-      font-size: 30px;
-      margin-bottom: 25px;
-      color: #6a5acd;
-    }
-
-    .card {
-      background: rgba(255, 255, 255, 0.7);
-      padding: 20px;
-      border-radius: 18px;
-      margin-bottom: 25px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    }
-
-    .card h2 {
-      margin: 0 0 12px 0;
-      font-size: 20px;
-      color: #6a5acd;
-    }
-
-    label {
-      font-size: 14px;
-      font-weight: 600;
-      color: #555;
-    }
-
+    .card { background:white; padding:20px; margin-bottom:20px; border-radius:18px; }
     input, select {
-      width: 100%;
-      padding: 12px;
-      margin-top: 6px;
-      margin-bottom: 18px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      font-size: 15px;
-      background: white;
+      width:100%; padding:12px; margin-top:6px; margin-bottom:14px;
+      border-radius:12px; border:1px solid #ccc;
     }
-
     button {
-      width: 100%;
-      background: linear-gradient(135deg, #ffafcc, #a5d8ff);
-      border: none;
-      padding: 15px;
-      font-size: 18px;
-      border-radius: 14px;
-      font-weight: bold;
-      color: white;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
-      cursor: pointer;
-    }
-
-    #success {
-      text-align: center;
-      margin-top: 15px;
-      font-size: 18px;
-      color: #4caf50;
-      font-weight: bold;
-      display: none;
+      width:100%; padding:14px; border:none; border-radius:14px;
+      background:#6a4cff; color:white; font-size:18px;
     }
   </style>
 </head>
-
 <body>
-
-<div class="top-nav">
-  <a href="setup.html">🎯 Ayı Başlat</a>
-  <a href="form.html">📝 Günlük Veri</a>
-  <a href="dashboard.html">📊 Dashboard</a>
-</div>
 
 <h1>📅 Ayı Başlat</h1>
 
 <div class="card">
-  <h2>Ay Seçimi</h2>
-
-  <label>Ay</label>
-  <select id="month">
-    <option>Ocak</option>
-    <option>Şubat</option>
-    <option>Mart</option>
-    <option>Nisan</option>
-    <option>Mayıs</option>
-    <option>Haziran</option>
-    <option>Temmuz</option>
-    <option>Ağustos</option>
-    <option>Eylül</option>
-    <option>Ekim</option>
-    <option>Kasım</option>
-    <option>Aralık</option>
-  </select>
-
-  <label>Yıl</label>
-  <select id="year">
-    <option>2024</option>
-    <option>2025</option>
-    <option>2026</option>
-    <option>2027</option>
-    <option>2028</option>
-    <option>2029</option>
-    <option>2030</option>
-  </select>
-</div>
-
-<div class="card">
-  <h2>Aylık Ciro Hedefi</h2>
-  <label>Ciro Hedefi (TL)</label>
-  <input id="ciroHedef" type="number" placeholder="100000" />
-</div>
-
-<div class="card">
-  <h2>Fokus Ürün 1</h2>
-  <label>Fokus 1 Adı</label>
-  <input id="fokus1_ad" type="text" placeholder="Moisture Surge" />
-  <label>Fokus 1 Aylık Hedef</label>
-  <input id="fokus1_hedef" type="number" placeholder="30" />
-</div>
-
-<div class="card">
-  <h2>Fokus Ürün 2</h2>
-  <label>Fokus 2 Adı</label>
-  <input id="fokus2_ad" type="text" placeholder="Ürün adı" />
-  <label>Fokus 2 Aylık Hedef</label>
-  <input id="fokus2_hedef" type="number" placeholder="20" />
-</div>
-
-<div class="card">
-  <h2>Fokus Ürün 3</h2>
-  <label>Fokus 3 Adı</label>
-  <input id="fokus3_ad" type="text" placeholder="Ürün adı" />
-  <label>Fokus 3 Aylık Hedef</label>
-  <input id="fokus3_hedef" type="number" placeholder="10" />
+  <label>Aylık Ciro Hedefi (TL)</label>
+  <input id="ciroHedef" placeholder="100.000" />
 </div>
 
 <button id="saveBtn">Kaydet</button>
-<p id="success">✨ Kayıt Başarılı! Yönlendiriliyor…</p>
+<p id="ok" style="display:none;color:green;font-size:20px;text-align:center;">✔ Kaydedildi</p>
 
-<!-- 🔥 DÜZGÜN ÇALIŞAN FIREBASE FORMÜLÜ -->
 <script type="module">
-  import { initializeApp }
-    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
+import {
+  formatTLLive, TLtoNumber,
+  saveMonthlyStats
+} from "./common.js";
 
-  import { getFirestore, setDoc, doc }
-    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+// Yazarken TL formatla
+const hedefInput = document.getElementById("ciroHedef");
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBgh7QT9ORiww11m78X0GxaoPaU_kGB07E",
-    authDomain: "estee-lauder-app.firebaseapp.com",
-    projectId: "estee-lauder-app",
-    storageBucket: "estee-lauder-app.firebasestorage.app",
-    messagingSenderId: "585743636422",
-    appId: "1:585743636422:web:cb7094f89a04ad6deb84c7"
-  };
+hedefInput.addEventListener("input", () => {
+  const pos = hedefInput.selectionStart;
+  const lengthBefore = hedefInput.value.length;
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+  hedefInput.value = formatTLLive(hedefInput.value);
 
-  document.getElementById("saveBtn").onclick = async () => {
+  const lengthAfter = hedefInput.value.length;
+  hedefInput.selectionEnd = pos + (lengthAfter - lengthBefore);
+});
 
-    const data = {
-      month: document.getElementById("month").value,
-      year: Number(document.getElementById("year").value),
+// Kaydet
+document.getElementById("saveBtn").onclick = async () => {
+  const raw = document.getElementById("ciroHedef").value;
+  const goal = TLtoNumber(raw);
 
-      monthlyGoal: Number(document.getElementById("ciroHedef").value),
+  await saveMonthlyStats({
+    monthlyGoal: goal,
+    createdAt: new Date().toISOString()
+  });
 
-      fokus1_ad: document.getElementById("fokus1_ad").value,
-      fokus1_hedef: Number(document.getElementById("fokus1_hedef").value),
-
-      fokus2_ad: document.getElementById("fokus2_ad").value,
-      fokus2_hedef: Number(document.getElementById("fokus2_hedef").value),
-
-      fokus3_ad: document.getElementById("fokus3_ad").value,
-      fokus3_hedef: Number(document.getElementById("fokus3_hedef").value),
-
-      // Dashboard’ın ihtiyacı olan başlangıç değeri:
-      monthlySales: 0,
-
-      createdAt: new Date().toISOString()
-    };
-
-    // 🔥 En önemli düzeltme → Settings değil
-    // monthlyStats/current belgesine kayıt
-    await setDoc(doc(db, "monthlyStats", "current"), data);
-
-    document.getElementById("success").style.display = "block";
-
-    setTimeout(() => {
-      window.location.href = "form.html";
-    }, 1200);
-  };
+  document.getElementById("ok").style.display = "block";
+  setTimeout(() => location.href = "form.html", 800);
+};
 </script>
 
 </body>
