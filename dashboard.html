@@ -186,209 +186,225 @@
 </table>
 
 <script type="module">
-  import { initializeApp } 
-    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
 
-  import { getFirestore, collection, getDocs, query, orderBy, limit }
-    from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+/* -------------------------
+   FIREBASE
+--------------------------*/
+import { initializeApp } 
+  from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
 
-  const firebaseConfig = {
-    apiKey: "AIzaSyBgh7QT9ORiww11m78X0GxaoPaU_kGB07E",
-    authDomain: "estee-lauder-app.firebaseapp.com",
-    projectId: "estee-lauder-app",
-    storageBucket: "estee-lauder-app.firebasestorage.app",
-    messagingSenderId: "585743636422",
-    appId: "1:585743636422:web:cb7094f89a04ad6deb84c7"
-  };
+import { 
+  getFirestore, doc, getDoc, 
+  collection, getDocs 
+} from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
-  const app = initializeApp(firebaseConfig);
-  const db = getFirestore(app);
+const firebaseConfig = {
+  apiKey: "AIzaSyBgh7QT9ORiww11m78X0GxaoPaU_kGB07E",
+  authDomain: "estee-lauder-app.firebaseapp.com",
+  projectId: "estee-lauder-app",
+  storageBucket: "estee-lauder-app.firebasestorage.app",
+  messagingSenderId: "585743636422",
+  appId: "1:585743636422:web:cb7094f89a04ad6deb84c7"
+};
 
-  let settings = null;
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-  async function loadSettings() {
-    const q = query(collection(db, "settings"), orderBy("createdAt", "desc"), limit(1));
-    const snap = await getDocs(q);
-    snap.forEach(doc => settings = doc.data());
+let settings = null;
 
-    if (settings) {
-      document.getElementById("ciroHedef").innerText = settings.ciroHedef;
-    }
-    return settings;
+/* -------------------------
+   AYLIK AYARLARI ÇEK
+--------------------------*/
+async function loadSettings() {
+  const ref = doc(db, "monthlyStats", "current");
+  const snap = await getDoc(ref);
+
+  if (snap.exists()) {
+    settings = snap.data();
+    document.getElementById("ciroHedef").innerText = settings.monthlyGoal;
+  } else {
+    settings = { monthlyGoal: 0 };
   }
 
-  async function loadDaily() {
-    const snap = await getDocs(collection(db, "daily"));
-    let data = [];
-    snap.forEach(doc => data.push(doc.data()));
-    return data;
-  }
+  return settings;
+}
 
-  function sum(arr, key) {
-    return arr.reduce((t, x) => t + Number(x[key] || 0), 0);
-  }
+/* -------------------------
+   GÜNLÜK VERİLERİ ÇEK
+--------------------------*/
+async function loadDaily() {
+  const snap = await getDocs(collection(db, "daily"));
+  let data = [];
+  snap.forEach(doc => data.push(doc.data()));
+  return data;
+}
 
-  function fillTable(data) {
-    const tbody = document.getElementById("dataTable");
-    tbody.innerHTML = "";
-    data.forEach(x => {
-      tbody.innerHTML += `
-        <tr>
-          <td>${x.tarih}</td>
-          <td>${x.ciro}</td>
-          <td>${x.fokus1}</td>
-          <td>${x.fokus2}</td>
-          <td>${x.fokus3}</td>
-          <td>${x.not || ""}</td>
-        </tr>
-      `;
-    });
-  }
-
-  function fokusCard(ad, hedef, satilan) {
-    let kalan = hedef - satilan;
-    let gunlukGerek = kalan / 30;
-
-    return `
-      <div class="card">
-        <h2>${ad}</h2>
-        <p class="value">Hedef: ${hedef}</p>
-        <p class="value">Satılan: ${satilan}</p>
-        <p class="value">Kalan: ${kalan}</p>
-        <p class="value">Günlük Gerekli: ${gunlukGerek.toFixed(1)}</p>
-      </div>
+/* -------------------------
+   TABLOYA YAZDIR
+--------------------------*/
+function fillTable(data) {
+  const tbody = document.getElementById("dataTable");
+  tbody.innerHTML = "";
+  data.forEach(x => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${x.tarih}</td>
+        <td>${x.ciro}</td>
+        <td>${x.fokus1 || 0}</td>
+        <td>${x.fokus2 || 0}</td>
+        <td>${x.fokus3 || 0}</td>
+        <td>${x.not || ""}</td>
+      </tr>
     `;
-  }
+  });
+}
 
-  async function main() {
-    await loadSettings();
-    let data = await loadDaily();
+/* -------------------------
+   YARDIMCI FONKSİYON
+--------------------------*/
+function sum(arr, key) {
+  return arr.reduce((t, x) => t + Number(x[key] || 0), 0);
+}
 
-    fillTable(data);
+/* -------------------------
+   FOKUS KARTI
+--------------------------*/
+function fokusCard(ad, hedef, satilan) {
+  const kalan = hedef - satilan;
+  const gunluk = kalan / 30;
 
-    let toplamCiro = sum(data, "ciro");
-    let kalanCiro = (settings?.ciroHedef || 0) - toplamCiro;
-    let gunlukGerek = kalanCiro / 30;
+  return `
+    <div class="card">
+      <h2>${ad}</h2>
+      <p class="value">Hedef: ${hedef}</p>
+      <p class="value">Satılan: ${satilan}</p>
+      <p class="value">Kalan: ${kalan}</p>
+      <p class="value">Günlük Gerekli: ${gunluk.toFixed(1)}</p>
+    </div>
+  `;
+}
 
-    document.getElementById("ciroYapilan").innerText = toplamCiro;
-    document.getElementById("ciroKalan").innerText = kalanCiro;
-    document.getElementById("ciroGunluk").innerText = gunlukGerek.toFixed(1);
+/* -------------------------
+   ANA FONKSİYON
+--------------------------*/
+async function main() {
 
-    let hedef = settings.ciroHedef;
-    let yapilan = toplamCiro;
-    let basari = (yapilan / hedef) * 100;
-    document.getElementById("basariYuzde").innerText = basari.toFixed(1) + "%";
-    document.getElementById("progressBar").style.width = Math.min(basari, 110) + "%";
+  await loadSettings();
+  const data = await loadDaily();
 
-    let barem80 = hedef * 0.80;
-    let barem90 = hedef * 0.90;
-    let barem100 = hedef * 1.00;
-    let barem110 = hedef * 1.10;
+  fillTable(data);
 
-    document.getElementById("barem80").innerText = Math.max(0, barem80 - yapilan).toFixed(0);
-    document.getElementById("barem90").innerText = Math.max(0, barem90 - yapilan).toFixed(0);
-    document.getElementById("barem100").innerText = Math.max(0, barem100 - yapilan).toFixed(0);
-    document.getElementById("barem110").innerText = Math.max(0, barem110 - yapilan).toFixed(0);
+  const toplamCiro = sum(data, "ciro");
 
-    let fokus1Top = sum(data, "fokus1");
-    let fokus2Top = sum(data, "fokus2");
-    let fokus3Top = sum(data, "fokus3");
+  // CİRO HESAPLARI
+  const kalan = settings.monthlyGoal - toplamCiro;
+  const gunluk = kalan / 30;
 
-    document.getElementById("fokusContainer").innerHTML =
-      fokusCard(settings.fokus1_ad, settings.fokus1_hedef, fokus1Top) +
-      fokusCard(settings.fokus2_ad, settings.fokus2_hedef, fokus2Top) +
-      fokusCard(settings.fokus3_ad, settings.fokus3_hedef, fokus3Top);
+  document.getElementById("ciroYapilan").innerText = toplamCiro;
+  document.getElementById("ciroKalan").innerText = kalan;
+  document.getElementById("ciroGunluk").innerText = gunluk.toFixed(1);
 
-    let yeniTop = sum(data, "yeni");
-    let satinTop = sum(data, "satin");
-    let durdurTop = sum(data, "durdurulan");
-    let davetTop = sum(data, "davet");
-    let davetsatinTop = sum(data, "davetsatin");
+  const hedef = settings.monthlyGoal;
+  const basari = hedef === 0 ? 0 : (toplamCiro / hedef) * 100;
 
-    document.getElementById("yeniTop").innerText = yeniTop;
-    document.getElementById("satinTop").innerText = satinTop;
-    document.getElementById("durdurTop").innerText = durdurTop;
-    document.getElementById("davetTop").innerText = davetTop;
-    document.getElementById("davetsatinTop").innerText = davetsatinTop;
+  document.getElementById("basariYuzde").innerText = basari.toFixed(1) + "%";
+  document.getElementById("progressBar").style.width = Math.min(basari, 110) + "%";
 
-    let cr = (satinTop / yeniTop) * 100 || 0;
-    let ssr = (satinTop / durdurTop) * 100 || 0;
-    let icr = (davetsatinTop / davetTop) * 100 || 0;
+  // Baremler
+  document.getElementById("barem80").innerText = Math.max(0, hedef * 0.8 - toplamCiro).toFixed(0);
+  document.getElementById("barem90").innerText = Math.max(0, hedef * 0.9 - toplamCiro).toFixed(0);
+  document.getElementById("barem100").innerText = Math.max(0, hedef - toplamCiro).toFixed(0);
+  document.getElementById("barem110").innerText = Math.max(0, hedef * 1.1 - toplamCiro).toFixed(0);
 
-    document.getElementById("cr").innerText = cr.toFixed(1) + "%";
-    document.getElementById("ssr").innerText = ssr.toFixed(1) + "%";
-    document.getElementById("icr").innerText = icr.toFixed(1) + "%";
+  // FOKUS ÜRÜNLER
+  const f1 = sum(data, "fokus1");
+  const f2 = sum(data, "fokus2");
+  const f3 = sum(data, "fokus3");
 
-    new Chart(document.getElementById("ciroChart"), {
-      type: 'line',
-      data: {
-        labels: data.map(x => x.tarih),
-        datasets: [{
-          label: "Günlük Ciro",
-          data: data.map(x => x.ciro),
-          borderColor: "#6a4cff",
-          borderWidth: 3
-        }]
-      }
-    });
+  document.getElementById("fokusContainer").innerHTML =
+    fokusCard(settings.fokus1_ad, settings.fokus1_hedef, f1) +
+    fokusCard(settings.fokus2_ad, settings.fokus2_hedef, f2) +
+    fokusCard(settings.fokus3_ad, settings.fokus3_hedef, f3);
 
-    new Chart(document.getElementById("fokusChart"), {
-      type: 'line',
-      data: {
-        labels: data.map(x => x.tarih),
-        datasets: [
-          { label: settings.fokus1_ad, data: data.map(x => x.fokus1), borderColor: "#ff7edb" },
-          { label: settings.fokus2_ad, data: data.map(x => x.fokus2), borderColor: "#7edfff" },
-          { label: settings.fokus3_ad, data: data.map(x => x.fokus3), borderColor: "#ffce7e" }
-        ]
-      }
-    });
+  // MUSTERI ANALITIGI
+  const yeniTop = sum(data, "yeni");
+  const satinTop = sum(data, "satin");
+  const durdurTop = sum(data, "durdurulan");
+  const davetTop = sum(data, "davet");
+  const davetsatinTop = sum(data, "davetsatin");
 
-  }
+  document.getElementById("yeniTop").innerText = yeniTop;
+  document.getElementById("satinTop").innerText = satinTop;
+  document.getElementById("durdurTop").innerText = durdurTop;
+  document.getElementById("davetTop").innerText = davetTop;
+  document.getElementById("davetsatinTop").innerText = davetsatinTop;
 
-  main();
+  document.getElementById("cr").innerText = ((satinTop / yeniTop) * 100 || 0).toFixed(1) + "%";
+  document.getElementById("ssr").innerText = ((satinTop / durdurTop) * 100 || 0).toFixed(1) + "%";
+  document.getElementById("icr").innerText = ((davetsatinTop / davetTop) * 100 || 0).toFixed(1) + "%";
 
-
-// =====================
-// EXCEL / CSV EXPORT
-// =====================
-
-document.getElementById("exportBtn").addEventListener("click", async () => {
-    const data = [];
-
-    // 🔥 DÜZELTİLEN KOLEKSİYON ADI: daily
-    const querySnapshot = await getDocs(collection(db, "daily"));
-    querySnapshot.forEach((doc) => {
-        data.push(doc.data());
-    });
-
-    if (data.length === 0) {
-        alert("Hiç veri yok!");
-        return;
+  // CIRO GRAFIĞI
+  new Chart(document.getElementById("ciroChart"), {
+    type: "line",
+    data: {
+      labels: data.map(x => x.tarih),
+      datasets: [{
+        label: "Günlük Ciro",
+        data: data.map(x => x.ciro),
+        borderColor: "#6a4cff",
+        borderWidth: 3
+      }]
     }
+  });
 
-    const csv = convertToCSV(data);
+  // FOKUS GRAFIĞI
+  new Chart(document.getElementById("fokusChart"), {
+    type: "line",
+    data: {
+      labels: data.map(x => x.tarih),
+      datasets: [
+        { label: settings.fokus1_ad, data: data.map(x => x.fokus1), borderColor: "#ff7edb" },
+        { label: settings.fokus2_ad, data: data.map(x => x.fokus2), borderColor: "#7edfff" },
+        { label: settings.fokus3_ad, data: data.map(x => x.fokus3), borderColor: "#ffce7e" }
+      ]
+    }
+  });
 
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const url = URL.createObjectURL(blob);
+} // main()
 
-    const a = document.createElement("a");
-    a.href = url;
-    a.download = "estee-data.csv";
-    a.click();
+main();
+
+/* -------------------------
+   EXCEL EXPORT
+--------------------------*/
+
+document.getElementById("exportBtn")?.addEventListener("click", async () => {
+  const data = [];
+  const snap = await getDocs(collection(db, "daily"));
+  snap.forEach(doc => data.push(doc.data()));
+
+  if (data.length === 0) {
+    alert("Hiç veri yok!");
+    return;
+  }
+
+  const headers = Object.keys(data[0]);
+  let csv = headers.join(",") + "\n";
+
+  data.forEach(row => {
+    const values = headers.map(h => row[h]);
+    csv += values.join(",") + "\n";
+  });
+
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = "estee-data.csv";
+  a.click();
 });
 
-function convertToCSV(data) {
-    const headers = Object.keys(data[0]);
-    let csv = headers.join(",") + "\n";
-
-    data.forEach(row => {
-        const values = headers.map(h => row[h]);
-        csv += values.join(",") + "\n";
-    });
-
-    return csv;
-}
 </script>
 
 <button id="exportBtn" style="margin: 20px; padding:10px 15px;">
