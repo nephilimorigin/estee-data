@@ -12,14 +12,46 @@
       padding: 20px;
       margin: 0;
     }
-    .card { background:white; padding:20px; margin-bottom:20px; border-radius:18px; }
+    h1 {
+      font-size: 32px;
+      margin-bottom: 24px;
+    }
+    .card {
+      background: white;
+      padding: 20px;
+      margin-bottom: 20px;
+      border-radius: 18px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    }
+    .card h2 {
+      margin-top: 0;
+      font-size: 18px;
+      color: #6a4cff;
+    }
+    label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 4px;
+      margin-top: 10px;
+    }
     input, select {
-      width:100%; padding:12px; margin-top:6px; margin-bottom:14px;
-      border-radius:12px; border:1px solid #ccc;
+      width: 100%;
+      padding: 12px;
+      margin-top: 4px;
+      margin-bottom: 8px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      font-size: 15px;
     }
     button {
-      width:100%; padding:14px; border:none; border-radius:14px;
-      background:#6a4cff; color:white; font-size:18px;
+      width: 100%;
+      padding: 14px;
+      border: none;
+      border-radius: 14px;
+      background: #6a4cff;
+      color: white;
+      font-size: 18px;
+      font-weight: bold;
     }
   </style>
 </head>
@@ -28,22 +60,49 @@
 <h1>📅 Ayı Başlat</h1>
 
 <div class="card">
+  <h2>Aylık Ciro Hedefi</h2>
   <label>Aylık Ciro Hedefi (TL)</label>
   <input id="ciroHedef" placeholder="100.000" />
 </div>
 
+<div class="card">
+  <h2>Fokus Ürün 1</h2>
+  <label>Fokus 1 Adı</label>
+  <input id="fokus1_ad" placeholder="Örn: Moisture Surge">
+  <label>Fokus 1 Aylık Hedef (adet)</label>
+  <input id="fokus1_hedef" type="number" placeholder="30">
+</div>
+
+<div class="card">
+  <h2>Fokus Ürün 2</h2>
+  <label>Fokus 2 Adı</label>
+  <input id="fokus2_ad" placeholder="Ürün adı">
+  <label>Fokus 2 Aylık Hedef (adet)</label>
+  <input id="fokus2_hedef" type="number" placeholder="20">
+</div>
+
+<div class="card">
+  <h2>Fokus Ürün 3</h2>
+  <label>Fokus 3 Adı</label>
+  <input id="fokus3_ad" placeholder="Ürün adı">
+  <label>Fokus 3 Aylık Hedef (adet)</label>
+  <input id="fokus3_hedef" type="number" placeholder="10">
+</div>
+
 <button id="saveBtn">Kaydet</button>
-<p id="ok" style="display:none;color:green;font-size:20px;text-align:center;">✔ Kaydedildi</p>
+<p id="ok" style="display:none;color:green;font-size:20px;text-align:center;margin-top:12px;">
+  ✔ Kaydedildi
+</p>
 
 <script type="module">
 import {
-  formatTLLive, TLtoNumber,
+  formatTLLive,
+  TLtoNumber,
   saveMonthlyStats
 } from "./common.js";
 
-// Yazarken TL formatla
+// Ciro yazarken TL formatla
 const hedefInput = document.getElementById("ciroHedef");
-
 hedefInput.addEventListener("input", () => {
   const pos = hedefInput.selectionStart;
   const lengthBefore = hedefInput.value.length;
@@ -59,8 +118,22 @@ document.getElementById("saveBtn").onclick = async () => {
   const raw = document.getElementById("ciroHedef").value;
   const goal = TLtoNumber(raw);
 
+  const fokus1_ad = document.getElementById("fokus1_ad").value.trim();
+  const fokus2_ad = document.getElementById("fokus2_ad").value.trim();
+  const fokus3_ad = document.getElementById("fokus3_ad").value.trim();
+
+  const fokus1_hedef = Number(document.getElementById("fokus1_hedef").value) || 0;
+  const fokus2_hedef = Number(document.getElementById("fokus2_hedef").value) || 0;
+  const fokus3_hedef = Number(document.getElementById("fokus3_hedef").value) || 0;
+
   await saveMonthlyStats({
     monthlyGoal: goal,
+    fokus1_ad,
+    fokus1_hedef,
+    fokus2_ad,
+    fokus2_hedef,
+    fokus3_ad,
+    fokus3_hedef,
     createdAt: new Date().toISOString()
   });
 
