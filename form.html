@@ -6,10 +6,7 @@
 <title>Günlük Veri Girişi</title>
 
 <style>
-/* Taşmayı engelle */
-* {
-    box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
 body {
     margin: 0;
@@ -26,7 +23,6 @@ body {
     100% { background-position: 0% 50%; }
 }
 
-/* Üst menü */
 .top-nav {
     width: 100%;
     display: flex;
@@ -45,7 +41,6 @@ body {
     color: #4b3f72;
 }
 
-/* Form kutusu */
 .container {
     max-width: 480px;
     margin: 40px auto;
@@ -72,7 +67,6 @@ label {
     color: #4b3f72;
 }
 
-/* Girdi alanları */
 input {
     width: 100%;
     padding: 14px;
@@ -116,7 +110,7 @@ button {
 <input type="date" id="tarih">
 
 <label>Günlük Ciro (TL)</label>
-<input type="number" id="ciro">
+<input type="text" id="ciro">
 
 <label>Yeni Müşteri</label>
 <input type="number" id="yeni">
@@ -139,8 +133,46 @@ button {
 <button id="saveBtn">Kaydet</button>
 </div>
 
-<!-- 🔥 Firebase çalışan script -->
-<script type="module" src="script.js"></script>
+<!-- 🔥 TL FORMAT + FIREBASE ENTEGRASYON -->
+<script type="module">
+import {
+    formatTLLive,
+    TLtoNumber,
+    saveDaily
+} from "./common.js";
+
+// ❗ Ciro alanını yazarken otomatik TL formatlama
+const ciroInput = document.getElementById("ciro");
+ciroInput.addEventListener("input", () => {
+    const pos = ciroInput.selectionStart;
+    const before = ciroInput.value.length;
+
+    ciroInput.value = formatTLLive(ciroInput.value);
+
+    const after = ciroInput.value.length;
+    ciroInput.selectionEnd = pos + (after - before);
+});
+
+// 🔥 KAYDETME FONKSİYONU
+document.getElementById("saveBtn").onclick = async () => {
+    const data = {
+        tarih: document.getElementById("tarih").value,
+        ciro: TLtoNumber(document.getElementById("ciro").value),   // ✔ TL → sayı hale getirildi
+        yeni: Number(document.getElementById("yeni").value),
+        durdurulan: Number(document.getElementById("durdurulan").value),
+        satin: Number(document.getElementById("satin").value),
+        davet: Number(document.getElementById("davet").value),
+        davetsatin: Number(document.getElementById("davetsatin").value),
+        not: document.getElementById("not").value,
+        createdAt: new Date().toISOString()
+    };
+
+    await saveDaily(data);
+
+    alert("✔ Kayıt Başarılı!");
+    document.getElementById("ciro").value = "";
+};
+</script>
 
 </body>
 </html>
