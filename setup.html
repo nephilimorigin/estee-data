@@ -171,10 +171,12 @@
 <button id="saveBtn">Kaydet</button>
 <p id="success">✨ Kayıt Başarılı! Yönlendiriliyor…</p>
 
+<!-- 🔥 DÜZGÜN ÇALIŞAN FIREBASE FORMÜLÜ -->
 <script type="module">
   import { initializeApp }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-  import { getFirestore, addDoc, collection }
+
+  import { getFirestore, setDoc, doc }
     from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
   const firebaseConfig = {
@@ -190,11 +192,12 @@
   const db = getFirestore(app);
 
   document.getElementById("saveBtn").onclick = async () => {
+
     const data = {
       month: document.getElementById("month").value,
       year: Number(document.getElementById("year").value),
-      
-      ciroHedef: Number(document.getElementById("ciroHedef").value),
+
+      monthlyGoal: Number(document.getElementById("ciroHedef").value),
 
       fokus1_ad: document.getElementById("fokus1_ad").value,
       fokus1_hedef: Number(document.getElementById("fokus1_hedef").value),
@@ -205,10 +208,15 @@
       fokus3_ad: document.getElementById("fokus3_ad").value,
       fokus3_hedef: Number(document.getElementById("fokus3_hedef").value),
 
+      // Dashboard’ın ihtiyacı olan başlangıç değeri:
+      monthlySales: 0,
+
       createdAt: new Date().toISOString()
     };
 
-    await addDoc(collection(db, "settings"), data);
+    // 🔥 En önemli düzeltme → Settings değil
+    // monthlyStats/current belgesine kayıt
+    await setDoc(doc(db, "monthlyStats", "current"), data);
 
     document.getElementById("success").style.display = "block";
 
