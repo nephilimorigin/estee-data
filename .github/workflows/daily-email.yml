@@ -1,0 +1,36 @@
+name: Daily Report Mail
+
+on:
+  schedule:
+    - cron: "0 17 * * *"   # Türkiye saati 20:00 (UTC+3)
+
+jobs:
+  send-report:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Send Email
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          username: ${{ secrets.EMAIL_USER }}
+          password: ${{ secrets.EMAIL_PASS }}
+          subject: "Günlük Estee Lauder Raporun"
+          to: "seninkmail@xxx.com"
+          from: "Estee Bot <seninkmail@xxx.com>"
+          body: |
+            Günlük Performans:
+
+            📅 Tarih: $(date +"%d.%m.%Y")
+
+            Hedef: {{ciroHedef}} TL
+            Yapılan: {{toplamCiro}} TL
+            Kalan: {{kalanCiro}} TL
+            Günlük Gerekli: {{gunluk}} TL
+            Başarı: {{basari}} %
+
+          secure: true
