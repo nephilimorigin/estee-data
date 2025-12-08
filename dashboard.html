@@ -185,7 +185,6 @@
   <tbody id="dataTable"></tbody>
 </table>
 
-<!-- 🔥 TL format + Firestore ortak sistem -->
 <script type="module">
 import {
   numberToTL,
@@ -193,9 +192,7 @@ import {
   loadDailyAll
 } from "./common.js";
 
-/* -------------------------
-   TABLOYA YAZDIR
---------------------------*/
+/* TABLO */
 function fillTable(data) {
   const tbody = document.getElementById("dataTable");
   tbody.innerHTML = "";
@@ -203,7 +200,7 @@ function fillTable(data) {
     tbody.innerHTML += `
       <tr>
         <td>${x.tarih}</td>
-        <td>${numberToTL(x.ciro)}</td>
+        <td>${numberToTL(x.ciro)} TL</td>
         <td>${x.fokus1 || 0}</td>
         <td>${x.fokus2 || 0}</td>
         <td>${x.fokus3 || 0}</td>
@@ -213,73 +210,73 @@ function fillTable(data) {
   });
 }
 
-/* -------------------------
-   YARDIMCI SUM
---------------------------*/
 function sum(arr, key) {
   return arr.reduce((t, x) => t + Number(x[key] || 0), 0);
 }
 
-/* -------------------------
-   FOKUS KARTI
---------------------------*/
 function fokusCard(ad, hedef, satilan) {
-  const kalan = hedef - satilan;
-  const gunluk = kalan / 30;
+  const safeHedef = Number(hedef || 0);
+  const safeSatilan = Number(satilan || 0);
+  const kalan = safeHedef - safeSatilan;
+  const gunluk = safeHedef === 0 ? 0 : kalan / 30;
 
   return `
     <div class="card">
       <h2>${ad}</h2>
-      <p class="value">Hedef: ${hedef}</p>
-      <p class="value">Satılan: ${satilan}</p>
+      <p class="value">Hedef: ${safeHedef}</p>
+      <p class="value">Satılan: ${safeSatilan}</p>
       <p class="value">Kalan: ${kalan}</p>
       <p class="value">Günlük Gerekli: ${gunluk.toFixed(1)}</p>
     </div>
   `;
 }
 
-/* -------------------------
-   ANA FONKSİYON
---------------------------*/
 async function main() {
-
-  const settings = await loadMonthlyStats();
+  const settings = (await loadMonthlyStats()) || {};
   const data = await loadDailyAll();
 
   fillTable(data);
 
   const toplamCiro = sum(data, "ciro");
-
-  // Performans
-  const hedef = settings?.monthlyGoal || 0;
+  const hedef = Number(settings.monthlyGoal || 0);
   const kalan = hedef - toplamCiro;
-  const gunluk = kalan / 30;
+  const gunluk = hedef === 0 ? 0 : kalan / 30;
 
-  document.getElementById("ciroHedef").innerText = numberToTL(hedef);
-  document.getElementById("ciroYapilan").innerText = numberToTL(toplamCiro);
-  document.getElementById("ciroKalan").innerText = numberToTL(kalan);
-  document.getElementById("ciroGunluk").innerText = numberToTL(gunluk);
+  document.getElementById("ciroHedef").innerText = numberToTL(hedef) + " TL";
+  document.getElementById("ciroYapilan").innerText = numberToTL(toplamCiro) + " TL";
+  document.getElementById("ciroKalan").innerText = numberToTL(kalan) + " TL";
+  document.getElementById("ciroGunluk").innerText = numberToTL(gunluk) + " TL";
 
   const basari = hedef === 0 ? 0 : (toplamCiro / hedef) * 100;
-
   document.getElementById("basariYuzde").innerText = basari.toFixed(1) + "%";
   document.getElementById("progressBar").style.width = Math.min(basari, 110) + "%";
 
-  // Baremler
-  document.getElementById("barem80").innerText = numberToTL(Math.max(0, hedef * 0.8 - toplamCiro));
-  document.getElementById("barem90").innerText = numberToTL(Math.max(0, hedef * 0.9 - toplamCiro));
-  document.getElementById("barem100").innerText = numberToTL(Math.max(0, hedef - toplamCiro));
-  document.getElementById("barem110").innerText = numberToTL(Math.max(0, hedef * 1.1 - toplamCiro));
+  document.getElementById("barem80").innerText =
+    numberToTL(Math.max(0, hedef * 0.8 - toplamCiro)) + " TL";
+  document.getElementById("barem90").innerText =
+    numberToTL(Math.max(0, hedef * 0.9 - toplamCiro)) + " TL";
+  document.getElementById("barem100").innerText =
+    numberToTL(Math.max(0, hedef - toplamCiro)) + " TL";
+  document.getElementById("barem110").innerText =
+    numberToTL(Math.max(0, hedef * 1.1 - toplamCiro)) + " TL";
 
-  // Fokus
-  const f1 = sum(data, "fokus1");
-  const f2 = sum(data, "fokus2");
-  const f3 = sum(data, "fokus3");
+  // Fokus isim / hedefleri güvenli çek
+  const f1Name = settings.fokus1_ad || "Fokus 1";
+  const f2Name = settings.fokus2_ad || "Fokus 2";
+  const f3Name = settings.fokus3_ad || "Fokus 3";
+
+  const f1Goal = Number(settings.fokus1_hedef || 0);
+  const f2Goal = Number(settings.fokus2_hedef || 0);
+  const f3Goal = Number(settings.fokus3_hedef || 0);
+
+  const f1Sold = sum(data, "fokus1");
+  const f2Sold = sum(data, "fokus2");
+  const f3Sold = sum(data, "fokus3");
 
   document.getElementById("fokusContainer").innerHTML =
-    fokusCard(settings.fokus1_ad, settings.fokus1_hedef, f1) +
-    fokusCard(settings.fokus2_ad, settings.fokus2_hedef, f2) +
-    fokusCard(settings.fokus3_ad, settings.fokus3_hedef, f3);
+    fokusCard(f1Name, f1Goal, f1Sold) +
+    fokusCard(f2Name, f2Goal, f2Sold) +
+    fokusCard(f3Name, f3Goal, f3Sold);
 
   // Müşteri analitiği
   const yeniTop = sum(data, "yeni");
@@ -294,11 +291,11 @@ async function main() {
   document.getElementById("davetTop").innerText = davetTop;
   document.getElementById("davetsatinTop").innerText = davetsatinTop;
 
-  document.getElementById("cr").innerText = ((satinTop / yeniTop) * 100 || 0).toFixed(1) + "%";
-  document.getElementById("ssr").innerText = ((satinTop / durdurTop) * 100 || 0).toFixed(1) + "%";
-  document.getElementById("icr").innerText = ((davetsatinTop / davetTop) * 100 || 0).toFixed(1) + "%";
+  document.getElementById("cr").innerText = ((satinTop / (yeniTop || 1)) * 100).toFixed(1) + "%";
+  document.getElementById("ssr").innerText = ((satinTop / (durdurTop || 1)) * 100).toFixed(1) + "%";
+  document.getElementById("icr").innerText = ((davetsatinTop / (davetTop || 1)) * 100).toFixed(1) + "%";
 
-  // CIRO GRAFİĞİ
+  // Ciro grafiği
   new Chart(document.getElementById("ciroChart"), {
     type: "line",
     data: {
@@ -312,15 +309,15 @@ async function main() {
     }
   });
 
-  // FOKUS GRAFİĞİ
+  // Fokus grafiği
   new Chart(document.getElementById("fokusChart"), {
     type: "line",
     data: {
       labels: data.map(x => x.tarih),
       datasets: [
-        { label: settings.fokus1_ad, data: data.map(x => x.fokus1), borderColor: "#ff7edb" },
-        { label: settings.fokus2_ad, data: data.map(x => x.fokus2), borderColor: "#7edfff" },
-        { label: settings.fokus3_ad, data: data.map(x => x.fokus3), borderColor: "#ffce7e" }
+        { label: f1Name, data: data.map(x => x.fokus1 || 0), borderColor: "#ff7edb" },
+        { label: f2Name, data: data.map(x => x.fokus2 || 0), borderColor: "#7edfff" },
+        { label: f3Name, data: data.map(x => x.fokus3 || 0), borderColor: "#ffce7e" }
       ]
     }
   });
@@ -328,10 +325,7 @@ async function main() {
 
 main();
 
-/* -------------------------
-   EXCEL EXPORT
---------------------------*/
-
+// EXCEL EXPORT
 document.getElementById("exportBtn")?.addEventListener("click", async () => {
   const data = await loadDailyAll();
 
