@@ -67,7 +67,7 @@ label {
     color: #4b3f72;
 }
 
-input {
+input, textarea {
     width: 100%;
     padding: 14px;
     margin-top: 6px;
@@ -127,13 +127,21 @@ button {
 <label>Davet → Satış Alan</label>
 <input type="number" id="davetsatin">
 
+<label>Fokus 1</label>
+<input type="number" id="fokus1">
+
+<label>Fokus 2</label>
+<input type="number" id="fokus2">
+
+<label>Fokus 3</label>
+<input type="number" id="fokus3">
+
 <label>Not</label>
-<input type="text" id="not">
+<textarea id="not" rows="3"></textarea>
 
 <button id="saveBtn">Kaydet</button>
 </div>
 
-<!-- 🔥 TL FORMAT + FIREBASE ENTEGRASYON -->
 <script type="module">
 import {
     formatTLLive,
@@ -141,7 +149,7 @@ import {
     saveDaily
 } from "./common.js";
 
-// ❗ Ciro alanını yazarken otomatik TL formatlama
+// TL formatlama (canlı)
 const ciroInput = document.getElementById("ciro");
 ciroInput.addEventListener("input", () => {
     const pos = ciroInput.selectionStart;
@@ -153,16 +161,25 @@ ciroInput.addEventListener("input", () => {
     ciroInput.selectionEnd = pos + (after - before);
 });
 
-// 🔥 KAYDETME FONKSİYONU
+// KAYDET
 document.getElementById("saveBtn").onclick = async () => {
+
+    if (!document.getElementById("tarih").value) {
+      alert("Lütfen tarih seç!");
+      return;
+    }
+
     const data = {
-        tarih: document.getElementById("tarih").value,
-        ciro: TLtoNumber(document.getElementById("ciro").value),   // ✔ TL → sayı hale getirildi
+        tarih: document.getElementById("tarih").value.split("-").reverse().join("."), 
+        ciro: TLtoNumber(document.getElementById("ciro").value),
         yeni: Number(document.getElementById("yeni").value),
         durdurulan: Number(document.getElementById("durdurulan").value),
         satin: Number(document.getElementById("satin").value),
         davet: Number(document.getElementById("davet").value),
         davetsatin: Number(document.getElementById("davetsatin").value),
+        fokus1: Number(document.getElementById("fokus1").value || 0),
+        fokus2: Number(document.getElementById("fokus2").value || 0),
+        fokus3: Number(document.getElementById("fokus3").value || 0),
         not: document.getElementById("not").value,
         createdAt: new Date().toISOString()
     };
@@ -170,7 +187,7 @@ document.getElementById("saveBtn").onclick = async () => {
     await saveDaily(data);
 
     alert("✔ Kayıt Başarılı!");
-    document.getElementById("ciro").value = "";
+    location.reload();
 };
 </script>
 
