@@ -60,10 +60,27 @@
 
     .value { font-size: 20px; font-weight: bold; margin-top: 5px; }
 
+    .progress-wrap {
+      width: 100%;
+      background: #eee;
+      height: 22px;
+      border-radius: 14px;
+      overflow: hidden;
+      margin: 12px 0 15px 0;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #b395ff, #ff9ce8, #a0e9ff);
+      transition: width .6s ease;
+      border-radius: 14px;
+    }
+
     .delete-btn {
       background: #ff4a4a;
       border: none;
-      padding: 8px 12px;
+      padding: 7px 12px;
       color: white;
       border-radius: 6px;
       cursor: pointer;
@@ -75,18 +92,20 @@
       border-collapse: collapse;
       border-radius: 12px;
       overflow: hidden;
-      background: rgba(255,255,255,0.75);
+      background: rgba(255,255,255,0.85);
       margin-top: 20px;
     }
 
     th {
       background: #d7d2fe;
       padding: 10px;
+      font-size: 16px;
     }
 
     td {
       padding: 10px;
       border-bottom: 1px solid #eee;
+      font-size: 14px;
     }
   </style>
 </head>
@@ -101,6 +120,7 @@
 
 <h1>📊 Aylık Dashboard</h1>
 
+<!-- AYLIK PERFORMANS -->
 <div class="card">
   <h2>Aylık Ciro Performansı</h2>
   <p class="value">Hedef: <span id="ciroHedef">0</span></p>
@@ -109,18 +129,22 @@
   <p class="value">Günlük Gerekli: <span id="ciroGunluk">0</span></p>
 </div>
 
+<!-- İLERLEME KUTUSU -->
 <div class="card">
   <h2>🎯 Hedef İlerleme</h2>
   <p class="value">Genel Başarı: <span id="basariYuzde">0%</span></p>
+
   <div class="progress-wrap">
     <div id="progressBar" class="progress-bar"></div>
   </div>
+
   <p class="value">%80'e kalan: <span id="barem80">0</span></p>
-  <p class="value">%90'a kalan: <span id="barem90">0</span></p>
+  <p class="value">%90'e kalan: <span id="barem90">0</span></p>
   <p class="value">%100'e kalan: <span id="barem100">0</span></p>
   <p class="value">%110'e kalan: <span id="barem110">0</span></p>
 </div>
 
+<!-- TABLO -->
 <h2 style="margin-top:35px;color:#6a4cff;">📄 Günlük Kayıtlar</h2>
 
 <table>
@@ -136,71 +160,112 @@
   <tbody id="dataTable"></tbody>
 </table>
 
+<!-- GRAFİKLER -->
+<div class="card">
+  <h2>Günlük Ciro Grafiği</h2>
+  <canvas id="ciroChart"></canvas>
+</div>
+
+<div class="card">
+  <h2>Fokus Ürün Grafikleri</h2>
+  <canvas id="fokusChart"></canvas>
+</div>
+
 <script type="module">
-import { numberToTL, loadMonthlyStats, loadDailyAll, deleteRecord } from "./common.js";
-
-function renderTable(data) {
-  const tbody = document.getElementById("dataTable");
-  tbody.innerHTML = "";
-  data.forEach(row => {
-    tbody.innerHTML += `
-      <tr>
-        <td>${row.tarih}</td>
-        <td>${numberToTL(row.ciro)}</td>
-        <td>${row.fokus1 || 0}</td>
-        <td>${row.fokus2 || 0}</td>
-        <td>${row.fokus3 || 0}</td>
-        <td>${row.not || ""}</td>
-        <td><button class="delete-btn" onclick="deleteRow('${row.id}')">Sil</button></td>
-      </tr>
-    `;
-  });
-}
-
-window.deleteRow = async function(id) {
-  if (confirm("Bu kaydı silmek istediğine emin misin?")) {
-    await deleteRecord(id);
-    location.reload();
-  }
-};
+import {
+  numberToTL, loadMonthlyStats, loadDailyAll, deleteRecord
+} from "./common.js";
 
 function sum(arr, key) {
   return arr.reduce((t, x) => t + Number(x[key] || 0), 0);
 }
 
+function renderTable(list) {
+  const tbody = document.getElementById("dataTable");
+  tbody.innerHTML = "";
+
+  list.forEach(row => {
+    tbody.innerHTML += `
+    <tr>
+      <td>${row.tarih}</td>
+      <td>${numberToTL(row.ciro)}</td>
+      <td>${row.fokus1 || 0}</td>
+      <td>${row.fokus2 || 0}</td>
+      <td>${row.fokus3 || 0}</td>
+      <td>${row.not || ""}</td>
+      <td><button class="delete-btn" onclick="deleteRow('${row.id}')">Sil</button></td>
+    </tr>`;
+  });
+}
+
+window.deleteRow = async function(id) {
+  if (confirm("Bu kaydı silmek istiyor musun?")) {
+    await deleteRecord(id);
+    location.reload();
+  }
+};
+
 async function main() {
-  const settings = (await loadMonthlyStats()) || {};
+  const stats = await loadMonthlyStats();
   const data = await loadDailyAll();
+
   renderTable(data);
 
-  const toplamCiro = sum(data, "ciro");
-  const hedef = Number(settings.monthlyGoal || 0);
-  const kalan = hedef - toplamCiro;
+  const toplam = sum(data, "ciro");
+  const hedef = Number(stats?.monthlyGoal || 0);
+  const kalan = hedef - toplam;
 
-  // DOĞRU GÜNLÜK HESAP
   const now = new Date();
   const today = now.getDate();
   const totalDays = new Date(now.getFullYear(), now.getMonth() + 1, 0).getDate();
   const remainingDays = Math.max(1, totalDays - today + 1);
+
   const gunluk = hedef === 0 ? 0 : kalan / remainingDays;
 
   document.getElementById("ciroHedef").innerText = numberToTL(hedef);
-  document.getElementById("ciroYapilan").innerText = numberToTL(toplamCiro);
+  document.getElementById("ciroYapilan").innerText = numberToTL(toplam);
   document.getElementById("ciroKalan").innerText = numberToTL(kalan);
   document.getElementById("ciroGunluk").innerText = numberToTL(gunluk);
 
-  const basari = hedef === 0 ? 0 : (toplamCiro / hedef) * 100;
+  const basari = hedef === 0 ? 0 : (toplam / hedef) * 100;
   document.getElementById("basariYuzde").innerText = basari.toFixed(1) + "%";
   document.getElementById("progressBar").style.width = Math.min(basari, 110) + "%";
 
   document.getElementById("barem80").innerText =
-    numberToTL(Math.max(0, hedef * 0.8 - toplamCiro));
+    numberToTL(Math.max(0, hedef * 0.8 - toplam));
   document.getElementById("barem90").innerText =
-    numberToTL(Math.max(0, hedef * 0.9 - toplamCiro));
+    numberToTL(Math.max(0, hedef * 0.9 - toplam));
   document.getElementById("barem100").innerText =
-    numberToTL(Math.max(0, hedef - toplamCiro));
+    numberToTL(Math.max(0, hedef - toplam));
   document.getElementById("barem110").innerText =
-    numberToTL(Math.max(0, hedef * 1.1 - toplamCiro));
+    numberToTL(Math.max(0, hedef * 1.1 - toplam));
+
+  // --- CİRO GRAFİĞİ ---
+  new Chart(document.getElementById("ciroChart"), {
+    type: "line",
+    data: {
+      labels: data.map(x => x.tarih),
+      datasets: [{
+        label: "Günlük Ciro",
+        data: data.map(x => x.ciro),
+        borderColor: "#6a4cff",
+        borderWidth: 3
+      }]
+    }
+  });
+
+  // --- FOKUS GRAFİĞİ ---
+  new Chart(document.getElementById("fokusChart"), {
+    type: "line",
+    data: {
+      labels: data.map(x => x.tarih),
+      datasets: [
+        { label: "Fokus1", data: data.map(x => x.fokus1 || 0), borderColor: "#ff7edb" },
+        { label: "Fokus2", data: data.map(x => x.fokus2 || 0), borderColor: "#7edfff" },
+        { label: "Fokus3", data: data.map(x => x.fokus3 || 0), borderColor: "#ffce7e" }
+      ]
+    }
+  });
 }
 
 main();
