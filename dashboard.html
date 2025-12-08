@@ -8,9 +8,7 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    * {
-      box-sizing: border-box;
-    }
+    * { box-sizing: border-box; }
 
     body {
       font-family: Arial;
@@ -79,6 +77,24 @@
       color: #333;
     }
 
+    /* PROGRESS BAR */
+    .progress-wrap {
+      width: 100%;
+      background: #eee;
+      height: 22px;
+      border-radius: 14px;
+      overflow: hidden;
+      margin: 12px 0 15px 0;
+    }
+
+    .progress-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, #b395ff, #ff9ce8, #a0e9ff);
+      transition: width .6s ease;
+      border-radius: 14px;
+    }
+
     table {
       width: 100%;
       margin-top: 20px;
@@ -122,18 +138,31 @@
   <p class="value">Günlük Gerekli: <span id="ciroGunluk">0</span> TL</p>
 </div>
 
+<!-- 🎯 HEDEF İLERLEME KARTI -->
+<div class="card">
+  <h2>🎯 Hedef İlerleme</h2>
+
+  <p class="value">Genel Başarı: <span id="basariYuzde">0%</span></p>
+
+  <div class="progress-wrap">
+    <div id="progressBar" class="progress-bar"></div>
+  </div>
+
+  <p class="value">%80'e kalan: <span id="barem80">0</span> TL</p>
+  <p class="value">%90'a kalan: <span id="barem90">0</span> TL</p>
+  <p class="value">%100'e kalan: <span id="barem100">0</span> TL</p>
+  <p class="value">%110'a kalan: <span id="barem110">0</span> TL</p>
+</div>
+
 <div id="fokusContainer"></div>
 
 <div class="card">
   <h2>Müşteri Analitiği</h2>
-
   <p class="value">Yeni Müşteri: <span id="yeniTop">0</span></p>
   <p class="value">Satın Alan: <span id="satinTop">0</span></p>
   <p class="value">Satın Alma Oranı: <span id="cr">0%</span></p>
-
   <p class="value">Durdurulan: <span id="durdurTop">0</span></p>
   <p class="value">Durdurma Başarısı: <span id="ssr">0%</span></p>
-
   <p class="value">Davet Edilen: <span id="davetTop">0</span></p>
   <p class="value">Davet → Satış Alan: <span id="davetsatinTop">0</span></p>
   <p class="value">Davet Başarısı: <span id="icr">0%</span></p>
@@ -244,6 +273,7 @@
 
     fillTable(data);
 
+    // ---- Ciro Hesabı ----
     let toplamCiro = sum(data, "ciro");
     let kalanCiro = (settings?.ciroHedef || 0) - toplamCiro;
     let gunlukGerek = kalanCiro / 30;
@@ -252,6 +282,26 @@
     document.getElementById("ciroKalan").innerText = kalanCiro;
     document.getElementById("ciroGunluk").innerText = gunlukGerek.toFixed(1);
 
+    // ---- HEDEF İLERLEME & BAREM HESAPLARI ----
+    let hedef = settings.ciroHedef;
+    let yapilan = toplamCiro;
+
+    let basari = (yapilan / hedef) * 100;
+    document.getElementById("basariYuzde").innerText = basari.toFixed(1) + "%";
+
+    document.getElementById("progressBar").style.width = Math.min(basari, 110) + "%";
+
+    let barem80 = hedef * 0.80;
+    let barem90 = hedef * 0.90;
+    let barem100 = hedef * 1.00;
+    let barem110 = hedef * 1.10;
+
+    document.getElementById("barem80").innerText = Math.max(0, barem80 - yapilan).toFixed(0);
+    document.getElementById("barem90").innerText = Math.max(0, barem90 - yapilan).toFixed(0);
+    document.getElementById("barem100").innerText = Math.max(0, barem100 - yapilan).toFixed(0);
+    document.getElementById("barem110").innerText = Math.max(0, barem110 - yapilan).toFixed(0);
+
+    // ---- Fokus toplamları ----
     let fokus1Top = sum(data, "fokus1");
     let fokus2Top = sum(data, "fokus2");
     let fokus3Top = sum(data, "fokus3");
@@ -261,6 +311,7 @@
       fokusCard(settings.fokus2_ad, settings.fokus2_hedef, fokus2Top) +
       fokusCard(settings.fokus3_ad, settings.fokus3_hedef, fokus3Top);
 
+    // ---- Müşteri Analitiği ----
     let yeniTop = sum(data, "yeni");
     let satinTop = sum(data, "satin");
     let durdurTop = sum(data, "durdurulan");
@@ -281,16 +332,14 @@
     document.getElementById("ssr").innerText = ssr.toFixed(1) + "%";
     document.getElementById("icr").innerText = icr.toFixed(1) + "%";
 
-    let labels = data.map(x => x.tarih);
-    let ciroValues = data.map(x => x.ciro);
-
+    // ---- Grafikleri Çiz ----
     new Chart(document.getElementById("ciroChart"), {
       type: 'line',
       data: {
-        labels: labels,
+        labels: data.map(x => x.tarih),
         datasets: [{
           label: "Günlük Ciro",
-          data: ciroValues,
+          data: data.map(x => x.ciro),
           borderColor: "#6a4cff",
           borderWidth: 3
         }]
@@ -300,7 +349,7 @@
     new Chart(document.getElementById("fokusChart"), {
       type: 'line',
       data: {
-        labels: labels,
+        labels: data.map(x => x.tarih),
         datasets: [
           { label: settings.fokus1_ad, data: data.map(x => x.fokus1), borderColor: "#ff7edb" },
           { label: settings.fokus2_ad, data: data.map(x => x.fokus2), borderColor: "#7edfff" },
@@ -308,6 +357,7 @@
         ]
       }
     });
+
   }
 
   main();
