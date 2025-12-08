@@ -26,7 +26,6 @@
       100% { background-position: 0% 50%; }
     }
 
-    /* Üst menü */
     .top-nav {
       width: 100%;
       display: flex;
@@ -77,7 +76,6 @@
       color: #333;
     }
 
-    /* PROGRESS BAR */
     .progress-wrap {
       width: 100%;
       background: #eee;
@@ -121,7 +119,6 @@
 
 <body>
 
-<!-- Üst menü -->
 <div class="top-nav">
   <a href="setup.html">🎯 Ayı Başlat</a>
   <a href="form.html">📝 Günlük Veri</a>
@@ -138,16 +135,12 @@
   <p class="value">Günlük Gerekli: <span id="ciroGunluk">0</span> TL</p>
 </div>
 
-<!-- 🎯 HEDEF İLERLEME KARTI -->
 <div class="card">
   <h2>🎯 Hedef İlerleme</h2>
-
   <p class="value">Genel Başarı: <span id="basariYuzde">0%</span></p>
-
   <div class="progress-wrap">
     <div id="progressBar" class="progress-bar"></div>
   </div>
-
   <p class="value">%80'e kalan: <span id="barem80">0</span> TL</p>
   <p class="value">%90'a kalan: <span id="barem90">0</span> TL</p>
   <p class="value">%100'e kalan: <span id="barem100">0</span> TL</p>
@@ -273,7 +266,6 @@
 
     fillTable(data);
 
-    // ---- Ciro Hesabı ----
     let toplamCiro = sum(data, "ciro");
     let kalanCiro = (settings?.ciroHedef || 0) - toplamCiro;
     let gunlukGerek = kalanCiro / 30;
@@ -282,13 +274,10 @@
     document.getElementById("ciroKalan").innerText = kalanCiro;
     document.getElementById("ciroGunluk").innerText = gunlukGerek.toFixed(1);
 
-    // ---- HEDEF İLERLEME & BAREM HESAPLARI ----
     let hedef = settings.ciroHedef;
     let yapilan = toplamCiro;
-
     let basari = (yapilan / hedef) * 100;
     document.getElementById("basariYuzde").innerText = basari.toFixed(1) + "%";
-
     document.getElementById("progressBar").style.width = Math.min(basari, 110) + "%";
 
     let barem80 = hedef * 0.80;
@@ -301,7 +290,6 @@
     document.getElementById("barem100").innerText = Math.max(0, barem100 - yapilan).toFixed(0);
     document.getElementById("barem110").innerText = Math.max(0, barem110 - yapilan).toFixed(0);
 
-    // ---- Fokus toplamları ----
     let fokus1Top = sum(data, "fokus1");
     let fokus2Top = sum(data, "fokus2");
     let fokus3Top = sum(data, "fokus3");
@@ -311,7 +299,6 @@
       fokusCard(settings.fokus2_ad, settings.fokus2_hedef, fokus2Top) +
       fokusCard(settings.fokus3_ad, settings.fokus3_hedef, fokus3Top);
 
-    // ---- Müşteri Analitiği ----
     let yeniTop = sum(data, "yeni");
     let satinTop = sum(data, "satin");
     let durdurTop = sum(data, "durdurulan");
@@ -332,7 +319,6 @@
     document.getElementById("ssr").innerText = ssr.toFixed(1) + "%";
     document.getElementById("icr").innerText = icr.toFixed(1) + "%";
 
-    // ---- Grafikleri Çiz ----
     new Chart(document.getElementById("ciroChart"), {
       type: 'line',
       data: {
@@ -361,6 +347,48 @@
   }
 
   main();
+
+
+// =====================
+// EXCEL / CSV EXPORT
+// =====================
+
+document.getElementById("exportBtn").addEventListener("click", async () => {
+    const data = [];
+
+    // 🔥 DÜZELTİLEN KOLEKSİYON ADI: daily
+    const querySnapshot = await getDocs(collection(db, "daily"));
+    querySnapshot.forEach((doc) => {
+        data.push(doc.data());
+    });
+
+    if (data.length === 0) {
+        alert("Hiç veri yok!");
+        return;
+    }
+
+    const csv = convertToCSV(data);
+
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "estee-data.csv";
+    a.click();
+});
+
+function convertToCSV(data) {
+    const headers = Object.keys(data[0]);
+    let csv = headers.join(",") + "\n";
+
+    data.forEach(row => {
+        const values = headers.map(h => row[h]);
+        csv += values.join(",") + "\n";
+    });
+
+    return csv;
+}
 </script>
 
 <button id="exportBtn" style="margin: 20px; padding:10px 15px;">
