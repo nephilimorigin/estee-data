@@ -1,224 +1,206 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1.0" />
-  <title>Dashboard</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1.0" />
+<title>Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script type="module" src="./common.js"></script>
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <script type="module" src="./common.js"></script>
-
-  <style>
-    * { box-sizing: border-box; }
-
-    body {
-      font-family: Arial;
-      padding: 20px;
-      margin: 0;
-      background: linear-gradient(135deg,#e1eafe,#f7d9e8,#d9f7f1);
-      background-size: 300% 300%;
-      animation: bgMove 10s ease infinite;
-      color: #444;
-    }
-    @keyframes bgMove {
-      0% { background-position:0% 50%; }
-      50% { background-position:100% 50%; }
-      100% { background-position:0% 50%; }
-    }
-
-    .top-nav {
-      display:flex;
-      justify-content:space-around;
-      background:rgba(255,255,255,0.7);
-      backdrop-filter:blur(10px);
-      padding:12px;
-      border-radius:16px;
-      margin-bottom:20px;
-      box-shadow:0 4px 15px rgba(0,0,0,0.08);
-    }
-    .top-nav a {
-      text-decoration:none;
-      font-weight:600;
-      color:#4b3f72;
-      font-size:16px;
-    }
-
-    h1 { text-align:center; color:#6a4cff; text-shadow:0 0 12px rgba(106,76,255,0.4); }
-
-    .card {
-      background:rgba(255,255,255,0.7);
-      backdrop-filter:blur(10px);
-      padding:18px;
-      border-radius:20px;
-      box-shadow:0 4px 20px rgba(0,0,0,0.1);
-      margin-bottom:22px;
-    }
-    .value { font-size:20px; font-weight:bold; margin-top:5px; }
-
-    .delete-btn {
-      background:#ff4a4a; border:none; padding:8px 12px;
-      color:white; border-radius:6px; cursor:pointer; font-size:13px;
-    }
-
-    table {
-      width:100%; border-collapse:collapse;
-      background:rgba(255,255,255,0.75);
-      border-radius:12px; overflow:hidden;
-    }
-    th { background:#d7d2fe; padding:10px; }
-    td { padding:10px; border-bottom:1px solid #eee; }
-  </style>
+<style>
+*{box-sizing:border-box;}
+body{
+font-family:Arial;padding:20px;margin:0;
+background:linear-gradient(135deg,#e1eafe,#f7d9e8,#d9f7f1);
+background-size:300% 300%;animation:bgMove 10s ease infinite;color:#444;}
+@keyframes bgMove{0%{background-position:0% 50%;}50%{background-position:100% 50%;}100%{background-position:0% 50%;}}
+.top-nav{display:flex;justify-content:space-around;background:rgba(255,255,255,0.7);
+backdrop-filter:blur(10px);padding:12px;border-radius:16px;margin-bottom:20px;box-shadow:0 4px 15px rgba(0,0,0,0.08);}
+.top-nav a{text-decoration:none;font-weight:600;color:#4b3f72;font-size:16px;}
+h1{text-align:center;color:#6a4cff;text-shadow:0 0 12px rgba(106,76,255,0.4);}
+.card{background:rgba(255,255,255,0.7);backdrop-filter:blur(10px);padding:18px;border-radius:20px;box-shadow:0 4px 20px rgba(0,0,0,0.1);margin-bottom:22px;}
+.value{font-size:20px;font-weight:bold;margin-top:5px;}
+.delete-btn{background:#ff4a4a;border:none;padding:8px 12px;color:white;border-radius:6px;cursor:pointer;font-size:13px;}
+table{width:100%;border-collapse:collapse;background:rgba(255,255,255,0.75);border-radius:12px;overflow:hidden;}
+th{background:#d7d2fe;padding:10px;}td{padding:10px;border-bottom:1px solid #eee;}
+</style>
 </head>
 
 <body>
 
 <div class="top-nav">
-  <a href="setup.html">🎯 Ayı Başlat</a>
-  <a href="form.html">📝 Günlük Veri</a>
-  <a href="dashboard.html">📊 Dashboard</a>
+<a href="setup.html">🎯 Ayı Başlat</a>
+<a href="form.html">📝 Günlük Veri</a>
+<a href="dashboard.html">📊 Dashboard</a>
 </div>
 
 <h1>📊 Aylık Dashboard</h1>
 
-<!-- 🔵 AYLIK CİRO -->
 <div class="card">
-  <h2>Aylık Ciro Performansı</h2>
-  <p class="value">Hedef: <span id="ciroHedef">0</span></p>
-  <p class="value">Yapılan: <span id="ciroYapilan">0</span></p>
-  <p class="value">Kalan: <span id="ciroKalan">0</span></p>
-  <p class="value">Günlük Gerekli: <span id="ciroGunluk">0</span></p>
+<h2>Aylık Ciro Performansı</h2>
+<p class="value">Hedef: <span id="ciroHedef">0</span></p>
+<p class="value">Yapılan: <span id="ciroYapilan">0</span></p>
+<p class="value">Kalan: <span id="ciroKalan">0</span></p>
+<p class="value">Günlük Gerekli: <span id="ciroGunluk">0</span></p>
+<p class="value">%80 Günlük Gerekli: <span id="ciroGunluk80">0</span></p>
+<p class="value">%90 Günlük Gerekli: <span id="ciroGunluk90">0</span></p>
+<p class="value">%100 Günlük Gerekli: <span id="ciroGunluk100">0</span></p>
+<p class="value">%110 Günlük Gerekli: <span id="ciroGunluk110">0</span></p>
 </div>
 
-<!-- 🔵 HEDEF İLERLEME -->
 <div class="card">
-  <h2>🎯 Hedef İlerleme</h2>
-  <p class="value">Genel Başarı: <span id="basariYuzde">0%</span></p>
-  <div style="background:#eee;height:10px;border-radius:10px;">
-    <div id="progressBar" style="height:10px;border-radius:10px;background:linear-gradient(90deg,#ff9a9e,#a1c4fd);width:0%;"></div>
-  </div>
-  <p class="value">%80'e kalan: <span id="barem80">0</span></p>
-  <p class="value">%90'a kalan: <span id="barem90">0</span></p>
-  <p class="value">%100'e kalan: <span id="barem100">0</span></p>
-  <p class="value">%110'e kalan: <span id="barem110">0</span></p>
+<h2>🎯 Hedef İlerleme</h2>
+<p class="value">Genel Başarı: <span id="basariYuzde">0%</span></p>
+<div style="background:#eee;height:10px;border-radius:10px;">
+<div id="progressBar" style="height:10px;border-radius:10px;background:linear-gradient(90deg,#ff9a9e,#a1c4fd);width:0%;"></div>
+</div>
+<p class="value">%80'e kalan: <span id="barem80">0</span></p>
+<p class="value">%90'a kalan: <span id="barem90">0</span></p>
+<p class="value">%100'e kalan: <span id="barem100">0</span></p>
+<p class="value">%110'e kalan: <span id="barem110">0</span></p>
 </div>
 
-<!-- 🔵 MÜŞTERİ ANALİTİĞİ -->
 <div class="card">
-  <h2>👥 Müşteri Analitiği</h2>
-  <p class="value">Yeni Müşteri: <span id="yeniTop">0</span></p>
-  <p class="value">Satın Alan: <span id="satinTop">0</span></p>
-  <p class="value">Satın Alma Oranı (CR): <span id="cr">0%</span></p>
-  <p class="value">Durdurulan: <span id="durdurTop">0</span></p>
-  <p class="value">Durdurma Başarısı (SSR): <span id="ssr">0%</span></p>
-  <p class="value">Davet Edilen: <span id="davetTop">0</span></p>
-  <p class="value">Davet → Satış Alan: <span id="davetsatinTop">0</span></p>
-  <p class="value">Davet Başarısı (ICR): <span id="icr">0%</span></p>
+<h2>📊 Yüzdelik Hedef Grafik</h2>
+<canvas id="yuzdelikChart" style="margin-top:15px;"></canvas>
+</div>
+
+<div class="card">
+<h2>👥 Müşteri Analitiği</h2>
+<p class="value">Yeni Müşteri: <span id="yeniTop">0</span></p>
+<p class="value">Satın Alan: <span id="satinTop">0</span></p>
+<p class="value">Satın Alma Oranı (CR): <span id="cr">0%</span></p>
+<p class="value">Durdurulan: <span id="durdurTop">0</span></p>
+<p class="value">Durdurma Başarısı (SSR): <span id="ssr">0%</span></p>
+<p class="value">Davet Edilen: <span id="davetTop">0</span></p>
+<p class="value">Davet → Satış Alan: <span id="davetsatinTop">0</span></p>
+<p class="value">Davet Başarısı (ICR): <span id="icr">0%</span></p>
 </div>
 
 <h2 style="color:#6a4cff;margin-top:30px;">📄 Günlük Kayıtlar</h2>
 
 <table>
-  <tr>
-    <th>Tarih</th>
-    <th>Ciro</th>
-    <th>Yeni</th>
-    <th>Satın</th>
-    <th>Durdur</th>
-    <th>Davet</th>
-    <th>Davet Satın</th>
-    <th>Not</th>
-    <th>Sil</th>
-  </tr>
-  <tbody id="dataTable"></tbody>
+<tr>
+<th>Tarih</th><th>Ciro</th><th>Yeni</th><th>Satın</th><th>Durdur</th><th>Davet</th><th>Davet Satın</th><th>Not</th><th>Sil</th>
+</tr>
+<tbody id="dataTable"></tbody>
 </table>
 
 <script type="module">
 import { numberToTL, loadMonthlyStats, loadDailyAll, deleteRecord } from "./common.js";
 
-function renderTable(data) {
-  const tbody = document.getElementById("dataTable");
-  tbody.innerHTML = "";
-
-  data.forEach(row => {
-    tbody.innerHTML += `
-      <tr>
-        <td>${row.tarih}</td>
-        <td>${numberToTL(row.ciro)}</td>
-        <td>${row.yeni || 0}</td>
-        <td>${row.satin || 0}</td>
-        <td>${row.durdurulan || 0}</td>
-        <td>${row.davet || 0}</td>
-        <td>${row.davetsatin || 0}</td>
-        <td>${row.not || ""}</td>
-        <td><button class="delete-btn" onclick="deleteRow('${row.id}')">Sil</button></td>
-      </tr>
-    `;
-  });
+function renderTable(data){
+const tbody=document.getElementById("dataTable");
+tbody.innerHTML="";
+data.forEach(row=>{
+tbody.innerHTML+=`
+<tr>
+<td>${row.tarih}</td>
+<td>${numberToTL(row.ciro)}</td>
+<td>${row.yeni||0}</td>
+<td>${row.satin||0}</td>
+<td>${row.durdurulan||0}</td>
+<td>${row.davet||0}</td>
+<td>${row.davetsatin||0}</td>
+<td>${row.not||""}</td>
+<td><button class="delete-btn" onclick="deleteRow('${row.id}')">Sil</button></td>
+</tr>`;});
 }
 
-window.deleteRow = async (id) => {
-  if (confirm("Bu kaydı silmek istiyor musun?")) {
-    await deleteRecord(id);
-    location.reload();
-  }
+window.deleteRow=async(id)=>{
+if(confirm("Bu kaydı silmek istiyor musun?")){
+await deleteRecord(id);location.reload();}
 };
 
-function sum(arr, key) {
-  return arr.reduce((t, x) => t + Number(x[key] || 0), 0);
+function sum(arr,key){return arr.reduce((t,x)=>t+Number(x[key]||0),0);}
+
+async function main(){
+const settings=(await loadMonthlyStats())||{};
+const data=await loadDailyAll();
+renderTable(data);
+
+const toplamCiro=sum(data,"ciro");
+const hedef=Number(settings.monthlyGoal||0);
+const kalan=hedef-toplamCiro;
+
+const now=new Date();
+const totalDays=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
+const remainingDays=Math.max(1,totalDays-now.getDate()+1);
+
+const gunluk=kalan/remainingDays;
+
+const hedef80=hedef*0.8, hedef90=hedef*0.9, hedef100=hedef, hedef110=hedef*1.1;
+const kalan80=Math.max(0,hedef80-toplamCiro);
+const kalan90=Math.max(0,hedef90-toplamCiro);
+const kalan100=Math.max(0,hedef100-toplamCiro);
+const kalan110=Math.max(0,hedef110-toplamCiro);
+
+document.getElementById("ciroHedef").innerText=numberToTL(hedef);
+document.getElementById("ciroYapilan").innerText=numberToTL(toplamCiro);
+document.getElementById("ciroKalan").innerText=numberToTL(kalan);
+document.getElementById("ciroGunluk").innerText=numberToTL(gunluk);
+
+document.getElementById("ciroGunluk80").innerText=numberToTL(kalan80/remainingDays);
+document.getElementById("ciroGunluk90").innerText=numberToTL(kalan90/remainingDays);
+document.getElementById("ciroGunluk100").innerText=numberToTL(kalan100/remainingDays);
+document.getElementById("ciroGunluk110").innerText=numberToTL(kalan110/remainingDays);
+
+const basari=hedef===0?0:(toplamCiro/hedef)*100;
+document.getElementById("basariYuzde").innerText=basari.toFixed(1)+"%";
+document.getElementById("progressBar").style.width=Math.min(basari,110)+"%";
+
+document.getElementById("barem80").innerText=numberToTL(kalan80);
+document.getElementById("barem90").innerText=numberToTL(kalan90);
+document.getElementById("barem100").innerText=numberToTL(kalan100);
+document.getElementById("barem110").innerText=numberToTL(kalan110);
+
+// 🔵 YÜZDELİK GRAFİK
+new Chart(document.getElementById("yuzdelikChart"),{
+type:"bar",
+data:{
+labels:["%80","%90","%100","%110"],
+datasets:[{
+label:"Kalan Tutar",
+data:[kalan80,kalan90,kalan100,kalan110],
+backgroundColor:[
+"rgba(255,99,132,0.6)",
+"rgba(255,159,64,0.6)",
+"rgba(75,192,192,0.6)",
+"rgba(153,102,255,0.6)"
+],
+borderColor:[
+"rgba(255,99,132,1)",
+"rgba(255,159,64,1)",
+"rgba(75,192,192,1)",
+"rgba(153,102,255,1)"
+],
+borderWidth:2,borderRadius:8
+}]
+},
+options:{
+responsive:true,
+plugins:{legend:{display:false}},
+scales:{y:{beginAtZero:true,ticks:{callback:value=>numberToTL(value)}}}
 }
+});
 
-async function main() {
-  const settings = (await loadMonthlyStats()) || {};
-  const data = await loadDailyAll();
-  renderTable(data);
+// 🔵 MÜŞTERİ ANALİTİĞİ
+const yeniTop=sum(data,"yeni");
+const satinTop=sum(data,"satin");
+const durdurTop=sum(data,"durdurulan");
+const davetTop=sum(data,"davet");
+const davetsatinTop=sum(data,"davetsatin");
 
-  // 🔵 CİRO ANALİZİ
-  const toplamCiro = sum(data, "ciro");
-  const hedef = Number(settings.monthlyGoal || 0);
-  const kalan = hedef - toplamCiro;
+document.getElementById("yeniTop").innerText=yeniTop;
+document.getElementById("satinTop").innerText=satinTop;
+document.getElementById("durdurTop").innerText=durdurTop;
+document.getElementById("davetTop").innerText=davetTop;
+document.getElementById("davetsatinTop").innerText=davetsatinTop;
 
-  const now = new Date();
-  const totalDays = new Date(now.getFullYear(), now.getMonth()+1, 0).getDate();
-  const remainingDays = Math.max(1, totalDays - now.getDate() + 1);
-  const gunluk = hedef === 0 ? 0 : kalan / remainingDays;
-
-  document.getElementById("ciroHedef").innerText = numberToTL(hedef);
-  document.getElementById("ciroYapilan").innerText = numberToTL(toplamCiro);
-  document.getElementById("ciroKalan").innerText = numberToTL(kalan);
-  document.getElementById("ciroGunluk").innerText = numberToTL(gunluk);
-
-  const basari = hedef === 0 ? 0 : (toplamCiro / hedef) * 100;
-  document.getElementById("basariYuzde").innerText = basari.toFixed(1) + "%";
-  document.getElementById("progressBar").style.width = Math.min(basari,110) + "%";
-
-  document.getElementById("barem80").innerText = numberToTL(Math.max(0, hedef*0.8 - toplamCiro));
-  document.getElementById("barem90").innerText = numberToTL(Math.max(0, hedef*0.9 - toplamCiro));
-  document.getElementById("barem100").innerText = numberToTL(Math.max(0, hedef - toplamCiro));
-  document.getElementById("barem110").innerText = numberToTL(Math.max(0, hedef*1.1 - toplamCiro));
-
-  // 🔵 MÜŞTERİ ANALİTİĞİ
-  const yeniTop = sum(data, "yeni");
-  const satinTop = sum(data, "satin");
-  const durdurTop = sum(data, "durdurulan");
-  const davetTop = sum(data, "davet");
-  const davetsatinTop = sum(data, "davetsatin");
-
-  document.getElementById("yeniTop").innerText = yeniTop;
-  document.getElementById("satinTop").innerText = satinTop;
-  document.getElementById("durdurTop").innerText = durdurTop;
-  document.getElementById("davetTop").innerText = davetTop;
-  document.getElementById("davetsatinTop").innerText = davetsatinTop;
-
-  document.getElementById("cr").innerText =
-    ((satinTop / (yeniTop || 1)) * 100).toFixed(1) + "%";
-
-  document.getElementById("ssr").innerText =
-    ((satinTop / (durdurTop || 1)) * 100).toFixed(1) + "%";
-
-  document.getElementById("icr").innerText =
-    ((davetsatinTop / (davetTop || 1)) * 100).toFixed(1) + "%";
+document.getElementById("cr").innerText=((satinTop/(yeniTop||1))*100).toFixed(1)+"%";
+document.getElementById("ssr").innerText=((satinTop/(durdurTop||1))*100).toFixed(1)+"%";
+document.getElementById("icr").innerText=((davetsatinTop/(davetTop||1))*100).toFixed(1)+"%";
 }
-
 main();
 </script>
 
