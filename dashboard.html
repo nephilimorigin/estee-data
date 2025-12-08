@@ -36,6 +36,7 @@ th{background:#d7d2fe;padding:10px;}td{padding:10px;border-bottom:1px solid #eee
 
 <h1>📊 Aylık Dashboard</h1>
 
+<!-- 🔵 CİRO KARTI -->
 <div class="card">
 <h2>Aylık Ciro Performansı</h2>
 <p class="value">Hedef: <span id="ciroHedef">0</span></p>
@@ -48,6 +49,7 @@ th{background:#d7d2fe;padding:10px;}td{padding:10px;border-bottom:1px solid #eee
 <p class="value">%110 Günlük Gerekli: <span id="ciroGunluk110">0</span></p>
 </div>
 
+<!-- 🔵 HEDEF İLERLEME -->
 <div class="card">
 <h2>🎯 Hedef İlerleme</h2>
 <p class="value">Genel Başarı: <span id="basariYuzde">0%</span></p>
@@ -60,11 +62,21 @@ th{background:#d7d2fe;padding:10px;}td{padding:10px;border-bottom:1px solid #eee
 <p class="value">%110'e kalan: <span id="barem110">0</span></p>
 </div>
 
+<!-- 🔵 YÜZDELİK GRAFİK -->
 <div class="card">
 <h2>📊 Yüzdelik Hedef Grafik</h2>
 <canvas id="yuzdelikChart" style="margin-top:15px;"></canvas>
 </div>
 
+<!-- 🔵 FOKUSLAR -->
+<div class="card">
+  <h2>🎯 Günlük Fokuslar</h2>
+  <p class="value">Fokus 1: <span id="fokus1">-</span></p>
+  <p class="value">Fokus 2: <span id="fokus2">-</span></p>
+  <p class="value">Fokus 3: <span id="fokus3">-</span></p>
+</div>
+
+<!-- 🔵 MÜŞTERİ ANALİTİĞİ -->
 <div class="card">
 <h2>👥 Müşteri Analitiği</h2>
 <p class="value">Yeni Müşteri: <span id="yeniTop">0</span></p>
@@ -200,6 +212,13 @@ document.getElementById("davetsatinTop").innerText=davetsatinTop;
 document.getElementById("cr").innerText=((satinTop/(yeniTop||1))*100).toFixed(1)+"%";
 document.getElementById("ssr").innerText=((satinTop/(durdurTop||1))*100).toFixed(1)+"%";
 document.getElementById("icr").innerText=((davetsatinTop/(davetTop||1))*100).toFixed(1)+"%";
+
+// 🔵 FOKUSLARI YÜKLE (son kayıt)
+const latest=data[data.length-1]||{};
+document.getElementById("fokus1").innerText=latest.fokus1||"-";
+document.getElementById("fokus2").innerText=latest.fokus2||"-";
+document.getElementById("fokus3").innerText=latest.fokus3||"-";
+
 }
 main();
 </script>
