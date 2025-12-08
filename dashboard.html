@@ -129,10 +129,10 @@
 
 <div class="card">
   <h2>Aylık Ciro Performansı</h2>
-  <p class="value">Hedef: <span id="ciroHedef">0</span> TL</p>
-  <p class="value">Yapılan: <span id="ciroYapilan">0</span> TL</p>
-  <p class="value">Kalan: <span id="ciroKalan">0</span> TL</p>
-  <p class="value">Günlük Gerekli: <span id="ciroGunluk">0</span> TL</p>
+  <p class="value">Hedef: <span id="ciroHedef">0</span></p>
+  <p class="value">Yapılan: <span id="ciroYapilan">0</span></p>
+  <p class="value">Kalan: <span id="ciroKalan">0</span></p>
+  <p class="value">Günlük Gerekli: <span id="ciroGunluk">0</span></p>
 </div>
 
 <div class="card">
@@ -141,10 +141,10 @@
   <div class="progress-wrap">
     <div id="progressBar" class="progress-bar"></div>
   </div>
-  <p class="value">%80'e kalan: <span id="barem80">0</span> TL</p>
-  <p class="value">%90'a kalan: <span id="barem90">0</span> TL</p>
-  <p class="value">%100'e kalan: <span id="barem100">0</span> TL</p>
-  <p class="value">%110'a kalan: <span id="barem110">0</span> TL</p>
+  <p class="value">%80'e kalan: <span id="barem80">0</span></p>
+  <p class="value">%90'a kalan: <span id="barem90">0</span></p>
+  <p class="value">%100'e kalan: <span id="barem100">0</span></p>
+  <p class="value">%110'a kalan: <span id="barem110">0</span></p>
 </div>
 
 <div id="fokusContainer"></div>
@@ -185,59 +185,13 @@
   <tbody id="dataTable"></tbody>
 </table>
 
+<!-- 🔥 TL format + Firestore ortak sistem -->
 <script type="module">
-
-/* -------------------------
-   FIREBASE
---------------------------*/
-import { initializeApp } 
-  from "https://www.gstatic.com/firebasejs/11.0.0/firebase-app.js";
-
-import { 
-  getFirestore, doc, getDoc, 
-  collection, getDocs 
-} from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
-
-const firebaseConfig = {
-  apiKey: "AIzaSyBgh7QT9ORiww11m78X0GxaoPaU_kGB07E",
-  authDomain: "estee-lauder-app.firebaseapp.com",
-  projectId: "estee-lauder-app",
-  storageBucket: "estee-lauder-app.firebasestorage.app",
-  messagingSenderId: "585743636422",
-  appId: "1:585743636422:web:cb7094f89a04ad6deb84c7"
-};
-
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
-
-let settings = null;
-
-/* -------------------------
-   AYLIK AYARLARI ÇEK
---------------------------*/
-async function loadSettings() {
-  const ref = doc(db, "monthlyStats", "current");
-  const snap = await getDoc(ref);
-
-  if (snap.exists()) {
-    settings = snap.data();
-    document.getElementById("ciroHedef").innerText = settings.monthlyGoal;
-  } else {
-    settings = { monthlyGoal: 0 };
-  }
-
-  return settings;
-}
-
-/* -------------------------
-   GÜNLÜK VERİLERİ ÇEK
---------------------------*/
-async function loadDaily() {
-  const snap = await getDocs(collection(db, "daily"));
-  let data = [];
-  snap.forEach(doc => data.push(doc.data()));
-  return data;
-}
+import {
+  numberToTL,
+  loadMonthlyStats,
+  loadDailyAll
+} from "./common.js";
 
 /* -------------------------
    TABLOYA YAZDIR
@@ -249,7 +203,7 @@ function fillTable(data) {
     tbody.innerHTML += `
       <tr>
         <td>${x.tarih}</td>
-        <td>${x.ciro}</td>
+        <td>${numberToTL(x.ciro)}</td>
         <td>${x.fokus1 || 0}</td>
         <td>${x.fokus2 || 0}</td>
         <td>${x.fokus3 || 0}</td>
@@ -260,7 +214,7 @@ function fillTable(data) {
 }
 
 /* -------------------------
-   YARDIMCI FONKSİYON
+   YARDIMCI SUM
 --------------------------*/
 function sum(arr, key) {
   return arr.reduce((t, x) => t + Number(x[key] || 0), 0);
@@ -289,34 +243,35 @@ function fokusCard(ad, hedef, satilan) {
 --------------------------*/
 async function main() {
 
-  await loadSettings();
-  const data = await loadDaily();
+  const settings = await loadMonthlyStats();
+  const data = await loadDailyAll();
 
   fillTable(data);
 
   const toplamCiro = sum(data, "ciro");
 
-  // CİRO HESAPLARI
-  const kalan = settings.monthlyGoal - toplamCiro;
+  // Performans
+  const hedef = settings?.monthlyGoal || 0;
+  const kalan = hedef - toplamCiro;
   const gunluk = kalan / 30;
 
-  document.getElementById("ciroYapilan").innerText = toplamCiro;
-  document.getElementById("ciroKalan").innerText = kalan;
-  document.getElementById("ciroGunluk").innerText = gunluk.toFixed(1);
+  document.getElementById("ciroHedef").innerText = numberToTL(hedef);
+  document.getElementById("ciroYapilan").innerText = numberToTL(toplamCiro);
+  document.getElementById("ciroKalan").innerText = numberToTL(kalan);
+  document.getElementById("ciroGunluk").innerText = numberToTL(gunluk);
 
-  const hedef = settings.monthlyGoal;
   const basari = hedef === 0 ? 0 : (toplamCiro / hedef) * 100;
 
   document.getElementById("basariYuzde").innerText = basari.toFixed(1) + "%";
   document.getElementById("progressBar").style.width = Math.min(basari, 110) + "%";
 
   // Baremler
-  document.getElementById("barem80").innerText = Math.max(0, hedef * 0.8 - toplamCiro).toFixed(0);
-  document.getElementById("barem90").innerText = Math.max(0, hedef * 0.9 - toplamCiro).toFixed(0);
-  document.getElementById("barem100").innerText = Math.max(0, hedef - toplamCiro).toFixed(0);
-  document.getElementById("barem110").innerText = Math.max(0, hedef * 1.1 - toplamCiro).toFixed(0);
+  document.getElementById("barem80").innerText = numberToTL(Math.max(0, hedef * 0.8 - toplamCiro));
+  document.getElementById("barem90").innerText = numberToTL(Math.max(0, hedef * 0.9 - toplamCiro));
+  document.getElementById("barem100").innerText = numberToTL(Math.max(0, hedef - toplamCiro));
+  document.getElementById("barem110").innerText = numberToTL(Math.max(0, hedef * 1.1 - toplamCiro));
 
-  // FOKUS ÜRÜNLER
+  // Fokus
   const f1 = sum(data, "fokus1");
   const f2 = sum(data, "fokus2");
   const f3 = sum(data, "fokus3");
@@ -326,7 +281,7 @@ async function main() {
     fokusCard(settings.fokus2_ad, settings.fokus2_hedef, f2) +
     fokusCard(settings.fokus3_ad, settings.fokus3_hedef, f3);
 
-  // MUSTERI ANALITIGI
+  // Müşteri analitiği
   const yeniTop = sum(data, "yeni");
   const satinTop = sum(data, "satin");
   const durdurTop = sum(data, "durdurulan");
@@ -343,7 +298,7 @@ async function main() {
   document.getElementById("ssr").innerText = ((satinTop / durdurTop) * 100 || 0).toFixed(1) + "%";
   document.getElementById("icr").innerText = ((davetsatinTop / davetTop) * 100 || 0).toFixed(1) + "%";
 
-  // CIRO GRAFIĞI
+  // CIRO GRAFİĞİ
   new Chart(document.getElementById("ciroChart"), {
     type: "line",
     data: {
@@ -357,7 +312,7 @@ async function main() {
     }
   });
 
-  // FOKUS GRAFIĞI
+  // FOKUS GRAFİĞİ
   new Chart(document.getElementById("fokusChart"), {
     type: "line",
     data: {
@@ -369,8 +324,7 @@ async function main() {
       ]
     }
   });
-
-} // main()
+}
 
 main();
 
@@ -379,9 +333,7 @@ main();
 --------------------------*/
 
 document.getElementById("exportBtn")?.addEventListener("click", async () => {
-  const data = [];
-  const snap = await getDocs(collection(db, "daily"));
-  snap.forEach(doc => data.push(doc.data()));
+  const data = await loadDailyAll();
 
   if (data.length === 0) {
     alert("Hiç veri yok!");
@@ -404,7 +356,6 @@ document.getElementById("exportBtn")?.addEventListener("click", async () => {
   a.download = "estee-data.csv";
   a.click();
 });
-
 </script>
 
 <button id="exportBtn" style="margin: 20px; padding:10px 15px;">
