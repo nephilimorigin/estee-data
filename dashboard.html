@@ -186,6 +186,7 @@ td{
     <div id="password-error">❌ Hatalı şifre</div>
   </div>
 </div>
+
 <div id="content" class="hidden">
 
 <div class="top-nav">
@@ -201,12 +202,6 @@ td{
   <h2>Aylık Ciro Performansı</h2>
   <p class="value">Hedef: <span id="ciroHedef">0</span></p>
   <p class="value">Yapılan: <span id="ciroYapilan">0</span></p>
-  <p class="value">Kalan: <span id="ciroKalan">0</span></p>
-  <p class="value">Günlük Gerekli: <span id="ciroGunluk">0</span></p>
-  <p class="value">%80 Günlük Gerekli: <span id="ciroGunluk80">0</span></p>
-  <p class="value">%90 Günlük Gerekli: <span id="ciroGunluk90">0</span></p>
-  <p class="value">%100 Günlük Gerekli: <span id="ciroGunluk100">0</span></p>
-  <p class="value">%110 Günlük Gerekli: <span id="ciroGunluk110">0</span></p>
 </div>
 
 <!-- 🔵 HEDEF -->
@@ -218,16 +213,33 @@ td{
          style="height:10px;border-radius:10px;background:linear-gradient(90deg,#ff9a9e,#a1c4fd);width:0%;">
     </div>
   </div>
-  <p class="value">%80'e kalan: <span id="barem80">0</span></p>
-  <p class="value">%90'a kalan: <span id="barem90">0</span></p>
-  <p class="value">%100'e kalan: <span id="barem100">0</span></p>
-  <p class="value">%110'e kalan: <span id="barem110">0</span></p>
+  <p class="value">
+    %80'e kalan: <span id="barem80">0</span>
+    / Günlük: <span id="barem80Gunluk">0</span>
+  </p>
+  <p class="value">
+    %90'a kalan: <span id="barem90">0</span>
+    / Günlük: <span id="barem90Gunluk">0</span>
+  </p>
+  <p class="value">
+    %100'e kalan: <span id="barem100">0</span>
+    / Günlük: <span id="barem100Gunluk">0</span>
+  </p>
+  <p class="value">
+    %110'e kalan: <span id="barem110">0</span>
+    / Günlük: <span id="barem110Gunluk">0</span>
+  </p>
 </div>
 
-<!-- 🔵 GRAFİK -->
+<!-- 🔵 GENEL MÜŞTERİ ÖZETİ -->
 <div class="card">
-  <h2>📊 Yüzdelik Grafik</h2>
-  <canvas id="yuzdelikChart"></canvas>
+  <h2>📦 Genel Müşteri Özeti</h2>
+  <p class="value">Yeni Müşteri: <span id="topYeni">0</span></p>
+  <p class="value">Satın Alan: <span id="topSatin">0</span></p>
+  <p class="value">Durdurulan: <span id="topDurdur">0</span></p>
+  <p class="value">Davet Edilen: <span id="topDavet">0</span></p>
+  <p class="value">Davet → Satın: <span id="topDavetSatin">0</span></p>
+  <p class="value">Toplam Ciro: <span id="topCiro">0</span></p>
 </div>
 
 <!-- 🔵 FOKUSLAR -->
@@ -238,16 +250,19 @@ td{
   <p class="value">Hedef: <span id="fokus1Hedef">0</span></p>
   <p class="value">Bugüne Kadar: <span id="fokus1Yapildi">0</span></p>
   <p class="value">Kalan: <span id="fokus1Kalan">0</span></p>
+  <p class="value">% Yapıldı: <span id="fokus1Yuzde">0%</span></p>
 
   <p class="value">Fokus 2 Günlük: <span id="fokus2">-</span></p>
   <p class="value">Hedef: <span id="fokus2Hedef">0</span></p>
   <p class="value">Bugüne Kadar: <span id="fokus2Yapildi">0</span></p>
   <p class="value">Kalan: <span id="fokus2Kalan">0</span></p>
+  <p class="value">% Yapıldı: <span id="fokus2Yuzde">0%</span></p>
 
   <p class="value">Fokus 3 Günlük: <span id="fokus3">-</span></p>
   <p class="value">Hedef: <span id="fokus3Hedef">0</span></p>
   <p class="value">Bugüne Kadar: <span id="fokus3Yapildi">0</span></p>
   <p class="value">Kalan: <span id="fokus3Kalan">0</span></p>
+  <p class="value">% Yapıldı: <span id="fokus3Yuzde">0%</span></p>
 </div>
 
 <!-- 🔵 TABLO -->
@@ -329,24 +344,46 @@ async function main(){
   const kalan100=Math.max(0,hedef100-toplamCiro);
   const kalan110=Math.max(0,hedef110-toplamCiro);
 
+  // Aylık Ciro kartı
   document.getElementById("ciroHedef").innerText=numberToTL(hedef);
   document.getElementById("ciroYapilan").innerText=numberToTL(toplamCiro);
-  document.getElementById("ciroKalan").innerText=numberToTL(kalan);
-  document.getElementById("ciroGunluk").innerText=numberToTL(kalan/remainingDays);
 
-  document.getElementById("ciroGunluk80").innerText=numberToTL(kalan80/remainingDays);
-  document.getElementById("ciroGunluk90").innerText=numberToTL(kalan90/remainingDays);
-  document.getElementById("ciroGunluk100").innerText=numberToTL(kalan100/remainingDays);
-  document.getElementById("ciroGunluk110").innerText=numberToTL(kalan110/remainingDays);
-
+  // Hedef İlerleme kartı – kalanlar
   document.getElementById("barem80").innerText=numberToTL(kalan80);
   document.getElementById("barem90").innerText=numberToTL(kalan90);
   document.getElementById("barem100").innerText=numberToTL(kalan100);
   document.getElementById("barem110").innerText=numberToTL(kalan110);
 
+  // Hedef İlerleme kartı – günlükler
+  const gunluk80 = kalan80 / remainingDays;
+  const gunluk90 = kalan90 / remainingDays;
+  const gunluk100 = kalan100 / remainingDays;
+  const gunluk110 = kalan110 / remainingDays;
+
+  document.getElementById("barem80Gunluk").innerText = numberToTL(gunluk80);
+  document.getElementById("barem90Gunluk").innerText = numberToTL(gunluk90);
+  document.getElementById("barem100Gunluk").innerText = numberToTL(gunluk100);
+  document.getElementById("barem110Gunluk").innerText = numberToTL(gunluk110);
+
   const basari=(hedef===0?0:(toplamCiro/hedef)*100);
   document.getElementById("basariYuzde").innerText=basari.toFixed(1)+"%";
   document.getElementById("progressBar").style.width=Math.min(basari,110)+"%";
+
+  /* =========================
+     🟣 GENEL MÜŞTERİ ÖZETİ
+     ========================= */
+  const toplamYeni = sum(data,"yeni");
+  const toplamSatin = sum(data,"satin");
+  const toplamDurdur = sum(data,"durdurulan");
+  const toplamDavet = sum(data,"davet");
+  const toplamDavetSatin = sum(data,"davetsatin");
+
+  document.getElementById("topYeni").innerText = toplamYeni;
+  document.getElementById("topSatin").innerText = toplamSatin;
+  document.getElementById("topDurdur").innerText = toplamDurdur;
+  document.getElementById("topDavet").innerText = toplamDavet;
+  document.getElementById("topDavetSatin").innerText = toplamDavetSatin;
+  document.getElementById("topCiro").innerText = numberToTL(toplamCiro);
 
   /* =========================
      🟣 FOKUS DOĞRU HESAPLAMA
@@ -391,6 +428,13 @@ async function main(){
   document.getElementById("fokus2Kalan").innerText=fokus2Kalan;
   document.getElementById("fokus3Kalan").innerText=fokus3Kalan;
 
+  const fokus1Yuzde = fokus1Hedef === 0 ? 0 : (fokus1YapildiToplam / fokus1Hedef) * 100;
+  const fokus2Yuzde = fokus2Hedef === 0 ? 0 : (fokus2YapildiToplam / fokus2Hedef) * 100;
+  const fokus3Yuzde = fokus3Hedef === 0 ? 0 : (fokus3YapildiToplam / fokus3Hedef) * 100;
+
+  document.getElementById("fokus1Yuzde").innerText = fokus1Yuzde.toFixed(1) + "%";
+  document.getElementById("fokus2Yuzde").innerText = fokus2Yuzde.toFixed(1) + "%";
+  document.getElementById("fokus3Yuzde").innerText = fokus3Yuzde.toFixed(1) + "%";
 }
 main();
 </script>
