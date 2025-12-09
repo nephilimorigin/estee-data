@@ -4,7 +4,6 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1.0" />
 <title>Dashboard</title>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script type="module" src="./common.js"></script>
 
 <style>
@@ -45,7 +44,7 @@ h1{
   text-shadow:0 0 12px rgba(106,76,255,0.4);
 }
 .card{
-  background:rgba(255,255,255,0.7);
+  background:rgba(255,255,255,0.75);
   backdrop-filter:blur(10px);
   padding:18px;
   border-radius:20px;
@@ -53,10 +52,28 @@ h1{
   margin-bottom:22px;
 }
 .value{
-  font-size:20px;
+  font-size:19px;
   font-weight:bold;
   margin-top:5px;
 }
+
+/* 🔵 MINI KUTU TASARIMI */
+.miniCard{
+  background:white;
+  border-radius:14px;
+  padding:15px;
+  margin-top:12px;
+  border:1px solid rgba(0,0,0,0.06);
+  box-shadow:0 2px 8px rgba(0,0,0,0.08);
+}
+.miniTitle{
+  font-size:17px;
+  font-weight:bold;
+  margin-bottom:8px;
+  color:#333;
+}
+
+/* SİL BUTONU */
 .delete-btn{
   background:#ff4a4a;
   border:none;
@@ -66,10 +83,12 @@ h1{
   cursor:pointer;
   font-size:13px;
 }
+
+/* TABLO */
 table{
   width:100%;
   border-collapse:collapse;
-  background:rgba(255,255,255,0.75);
+  background:rgba(255,255,255,0.78);
   border-radius:12px;
   overflow:hidden;
 }
@@ -92,98 +111,48 @@ td{
   align-items:center;
   background:radial-gradient(circle at top,#1f2937,#020617);
   color:#f9fafb;
-  font-family:Arial, system-ui;
   z-index:9999;
-  animation:fadeInBg 0.6s ease-out;
 }
 .password-box{
   background:rgba(15,23,42,0.96);
   padding:30px 26px;
   border-radius:18px;
-  box-shadow:0 18px 45px rgba(0,0,0,0.5);
-  text-align:center;
   width:280px;
-  max-width:90vw;
-  animation:floatUp 0.5s ease-out;
-  border:1px solid rgba(148,163,184,0.35);
-}
-.password-box h2{
-  margin:0 0 8px;
-  font-size:20px;
-}
-.password-box p{
-  margin:0 0 16px;
-  font-size:14px;
-  color:#cbd5f5;
+  text-align:center;
+  box-shadow:0 18px 45px rgba(0,0,0,0.5);
 }
 #password-input{
-  padding:10px 12px;
+  padding:10px;
   width:100%;
   border-radius:10px;
   border:1px solid #4b5563;
-  outline:none;
   background:#020617;
-  color:#f9fafb;
+  color:white;
   text-align:center;
-  font-size:15px;
-}
-#password-input:focus{
-  border-color:#38bdf8;
-  box-shadow:0 0 0 1px rgba(56,189,248,0.7);
 }
 .pass-btn{
-  margin-top:14px;
-  padding:10px 22px;
+  margin-top:12px;
+  padding:9px 20px;
   background:linear-gradient(135deg,#38bdf8,#818cf8);
-  color:#020617;
   border:none;
   border-radius:999px;
   cursor:pointer;
-  font-weight:600;
-  font-size:14px;
-  transition:transform 0.1s ease, box-shadow 0.1s ease;
-}
-.pass-btn:active{
-  transform:scale(0.97);
-}
-#password-error{
-  margin-top:10px;
-  font-size:13px;
-  color:#fca5a5;
-  opacity:0;
-  transform:translateY(4px);
-  transition:opacity 0.25s, transform 0.25s;
-}
-#password-screen.fade-out{
-  animation:fadeOutBg 0.4s ease-in forwards;
+  font-weight:bold;
 }
 .hidden{display:none;}
-
-@keyframes fadeInBg{
-  from{opacity:0; transform:scale(1.02);}
-  to{opacity:1; transform:scale(1);}
-}
-@keyframes fadeOutBg{
-  from{opacity:1;}
-  to{opacity:0; pointer-events:none;}
-}
-@keyframes floatUp{
-  from{opacity:0; transform:translateY(10px);}
-  to{opacity:1; transform:translateY(0);}
-}
 </style>
 </head>
 
 <body>
 
-<!-- 🔐 ŞİFRE EKRANI -->
+<!-- 🔐 ŞİFRE -->
 <div id="password-screen">
   <div class="password-box">
     <h2>🔒 Güvenli Dashboard</h2>
     <p>Devam etmek için şifreyi gir.</p>
-    <input id="password-input" type="password" placeholder="Şifre" autocomplete="off"/>
+    <input id="password-input" type="password" />
     <button class="pass-btn" onclick="checkPassword()">Giriş Yap</button>
-    <div id="password-error">❌ Hatalı şifre</div>
+    <div id="password-error" style="color:#ff9b9b;margin-top:8px;opacity:0;">Hatalı şifre</div>
   </div>
 </div>
 
@@ -197,72 +166,94 @@ td{
 
 <h1>📊 Aylık Dashboard</h1>
 
-<!-- 🔵 CİRO -->
+<!-- 🔵 CİRO KARTI -->
 <div class="card">
-  <h2>Aylık Ciro Performansı</h2>
+  <h2>Aylık Ciro</h2>
   <p class="value">Hedef: <span id="ciroHedef">0</span></p>
   <p class="value">Yapılan: <span id="ciroYapilan">0</span></p>
 </div>
 
-<!-- 🔵 HEDEF -->
+<!-- 🔵 HEDEF İLERLEME -->
 <div class="card">
   <h2>🎯 Hedef İlerleme</h2>
   <p class="value">Genel Başarı: <span id="basariYuzde">0%</span></p>
-  <div style="background:#eee;height:10px;border-radius:10px;">
-    <div id="progressBar"
-         style="height:10px;border-radius:10px;background:linear-gradient(90deg,#ff9a9e,#a1c4fd);width:0%;">
-    </div>
+
+  <div style="background:#eee;height:10px;border-radius:10px;margin-bottom:10px;">
+    <div id="progressBar" style="height:10px;border-radius:10px;background:linear-gradient(90deg,#ff9a9e,#a1c4fd);width:0%;"></div>
   </div>
-  <p class="value">
-    %80'e kalan: <span id="barem80">0</span>
-    / Günlük: <span id="barem80Gunluk">0</span>
-  </p>
-  <p class="value">
-    %90'a kalan: <span id="barem90">0</span>
-    / Günlük: <span id="barem90Gunluk">0</span>
-  </p>
-  <p class="value">
-    %100'e kalan: <span id="barem100">0</span>
-    / Günlük: <span id="barem100Gunluk">0</span>
-  </p>
-  <p class="value">
-    %110'e kalan: <span id="barem110">0</span>
-    / Günlük: <span id="barem110Gunluk">0</span>
-  </p>
+
+  <!-- %80 -->
+  <div class="miniCard">
+    <div class="miniTitle">%80 Hedefi</div>
+    <p>Kalan: <span id="barem80">0</span></p>
+    <p>Günlük: <span id="barem80Gunluk">0</span></p>
+  </div>
+
+  <!-- %90 -->
+  <div class="miniCard">
+    <div class="miniTitle">%90 Hedefi</div>
+    <p>Kalan: <span id="barem90">0</span></p>
+    <p>Günlük: <span id="barem90Gunluk">0</span></p>
+  </div>
+
+  <!-- %100 -->
+  <div class="miniCard">
+    <div class="miniTitle">%100 Hedefi</div>
+    <p>Kalan: <span id="barem100">0</span></p>
+    <p>Günlük: <span id="barem100Gunluk">0</span></p>
+  </div>
+
+  <!-- %110 -->
+  <div class="miniCard">
+    <div class="miniTitle">%110 Hedefi</div>
+    <p>Kalan: <span id="barem110">0</span></p>
+    <p>Günlük: <span id="barem110Gunluk">0</span></p>
+  </div>
 </div>
 
 <!-- 🔵 GENEL MÜŞTERİ ÖZETİ -->
 <div class="card">
   <h2>📦 Genel Müşteri Özeti</h2>
-  <p class="value">Yeni Müşteri: <span id="topYeni">0</span></p>
-  <p class="value">Satın Alan: <span id="topSatin">0</span></p>
-  <p class="value">Durdurulan: <span id="topDurdur">0</span></p>
-  <p class="value">Davet Edilen: <span id="topDavet">0</span></p>
-  <p class="value">Davet → Satın: <span id="topDavetSatin">0</span></p>
-  <p class="value">Toplam Ciro: <span id="topCiro">0</span></p>
+  <div class="miniCard">
+    <p>Yeni Müşteri: <span id="topYeni">0</span></p>
+    <p>Satın Alan: <span id="topSatin">0</span></p>
+    <p>Durdurulan: <span id="topDurdur">0</span></p>
+    <p>Davet Edilen: <span id="topDavet">0</span></p>
+    <p>Davet → Satın: <span id="topDavetSatin">0</span></p>
+    <p>Toplam Ciro: <span id="topCiro">0</span></p>
+  </div>
 </div>
 
-<!-- 🔵 FOKUSLAR -->
+<!-- 🔵 FOKUS İLERLEME -->
 <div class="card">
   <h2>🎯 Fokus İlerleme</h2>
 
-  <p class="value">Fokus 1 Günlük: <span id="fokus1">-</span></p>
-  <p class="value">Hedef: <span id="fokus1Hedef">0</span></p>
-  <p class="value">Bugüne Kadar: <span id="fokus1Yapildi">0</span></p>
-  <p class="value">Kalan: <span id="fokus1Kalan">0</span></p>
-  <p class="value">% Yapıldı: <span id="fokus1Yuzde">0%</span></p>
+  <div class="miniCard">
+    <div class="miniTitle">Fokus 1</div>
+    <p>Günlük: <span id="fokus1">0</span></p>
+    <p>Hedef: <span id="fokus1Hedef">0</span></p>
+    <p>Bugüne Kadar: <span id="fokus1Yapildi">0</span></p>
+    <p>Kalan: <span id="fokus1Kalan">0</span></p>
+    <p>% Yapıldı: <span id="fokus1Yuzde">0%</span></p>
+  </div>
 
-  <p class="value">Fokus 2 Günlük: <span id="fokus2">-</span></p>
-  <p class="value">Hedef: <span id="fokus2Hedef">0</span></p>
-  <p class="value">Bugüne Kadar: <span id="fokus2Yapildi">0</span></p>
-  <p class="value">Kalan: <span id="fokus2Kalan">0</span></p>
-  <p class="value">% Yapıldı: <span id="fokus2Yuzde">0%</span></p>
+  <div class="miniCard">
+    <div class="miniTitle">Fokus 2</div>
+    <p>Günlük: <span id="fokus2">0</span></p>
+    <p>Hedef: <span id="fokus2Hedef">0</span></p>
+    <p>Bugüne Kadar: <span id="fokus2Yapildi">0</span></p>
+    <p>Kalan: <span id="fokus2Kalan">0</span></p>
+    <p>% Yapıldı: <span id="fokus2Yuzde">0%</span></p>
+  </div>
 
-  <p class="value">Fokus 3 Günlük: <span id="fokus3">-</span></p>
-  <p class="value">Hedef: <span id="fokus3Hedef">0</span></p>
-  <p class="value">Bugüne Kadar: <span id="fokus3Yapildi">0</span></p>
-  <p class="value">Kalan: <span id="fokus3Kalan">0</span></p>
-  <p class="value">% Yapıldı: <span id="fokus3Yuzde">0%</span></p>
+  <div class="miniCard">
+    <div class="miniTitle">Fokus 3</div>
+    <p>Günlük: <span id="fokus3">0</span></p>
+    <p>Hedef: <span id="fokus3Hedef">0</span></p>
+    <p>Bugüne Kadar: <span id="fokus3Yapildi">0</span></p>
+    <p>Kalan: <span id="fokus3Kalan">0</span></p>
+    <p>% Yapıldı: <span id="fokus3Yuzde">0%</span></p>
+  </div>
 </div>
 
 <!-- 🔵 TABLO -->
@@ -281,13 +272,10 @@ td{
 </tr>
 <tbody id="dataTable"></tbody>
 </table>
-</div>
 
+</div><!-- CONTENT END -->
 
-<!-- ========================= -->
-<!--      JAVASCRIPT          -->
-<!-- ========================= -->
-
+<!-- ================ JAVASCRIPT ================ -->
 <script type="module">
 import { numberToTL, loadMonthlyStats, loadDailyAll, deleteRecord } from "./common.js";
 
@@ -324,9 +312,7 @@ async function main(){
   const data=await loadDailyAll();
   renderTable(data);
 
-  /* =========================
-     🟣 CİRO HESAPLARI
-     ========================= */
+  /* 📌 CİRO */
   const toplamCiro=sum(data,"ciro");
   const hedef=Number(settings.monthlyGoal||0);
   const kalan=hedef-toplamCiro;
@@ -334,145 +320,95 @@ async function main(){
   const totalDays=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
   const remainingDays=Math.max(1,totalDays-now.getDate()+1);
 
-  const hedef80=hedef*0.8;
-  const hedef90=hedef*0.9;
-  const hedef100=hedef;
-  const hedef110=hedef*1.1;
+  const hs={h80:hedef*0.8,h90:hedef*0.9,h100:hedef,h110:hedef*1.1};
+  const ks={
+    k80:Math.max(0,hs.h80-toplamCiro),
+    k90:Math.max(0,hs.h90-toplamCiro),
+    k100:Math.max(0,hs.h100-toplamCiro),
+    k110:Math.max(0,hs.h110-toplamCiro)
+  };
 
-  const kalan80=Math.max(0,hedef80-toplamCiro);
-  const kalan90=Math.max(0,hedef90-toplamCiro);
-  const kalan100=Math.max(0,hedef100-toplamCiro);
-  const kalan110=Math.max(0,hedef110-toplamCiro);
-
-  // Aylık Ciro kartı
   document.getElementById("ciroHedef").innerText=numberToTL(hedef);
   document.getElementById("ciroYapilan").innerText=numberToTL(toplamCiro);
 
-  // Hedef İlerleme kartı – kalanlar
-  document.getElementById("barem80").innerText=numberToTL(kalan80);
-  document.getElementById("barem90").innerText=numberToTL(kalan90);
-  document.getElementById("barem100").innerText=numberToTL(kalan100);
-  document.getElementById("barem110").innerText=numberToTL(kalan110);
+  document.getElementById("barem80").innerText=numberToTL(ks.k80);
+  document.getElementById("barem90").innerText=numberToTL(ks.k90);
+  document.getElementById("barem100").innerText=numberToTL(ks.k100);
+  document.getElementById("barem110").innerText=numberToTL(ks.k110);
 
-  // Hedef İlerleme kartı – günlükler
-  const gunluk80 = kalan80 / remainingDays;
-  const gunluk90 = kalan90 / remainingDays;
-  const gunluk100 = kalan100 / remainingDays;
-  const gunluk110 = kalan110 / remainingDays;
+  document.getElementById("barem80Gunluk").innerText=numberToTL(ks.k80/remainingDays);
+  document.getElementById("barem90Gunluk").innerText=numberToTL(ks.k90/remainingDays);
+  document.getElementById("barem100Gunluk").innerText=numberToTL(ks.k100/remainingDays);
+  document.getElementById("barem110Gunluk").innerText=numberToTL(ks.k110/remainingDays);
 
-  document.getElementById("barem80Gunluk").innerText = numberToTL(gunluk80);
-  document.getElementById("barem90Gunluk").innerText = numberToTL(gunluk90);
-  document.getElementById("barem100Gunluk").innerText = numberToTL(gunluk100);
-  document.getElementById("barem110Gunluk").innerText = numberToTL(gunluk110);
-
-  const basari=(hedef===0?0:(toplamCiro/hedef)*100);
+  const basari = hedef ? (toplamCiro/hedef)*100 : 0;
   document.getElementById("basariYuzde").innerText=basari.toFixed(1)+"%";
   document.getElementById("progressBar").style.width=Math.min(basari,110)+"%";
 
-  /* =========================
-     🟣 GENEL MÜŞTERİ ÖZETİ
-     ========================= */
-  const toplamYeni = sum(data,"yeni");
-  const toplamSatin = sum(data,"satin");
-  const toplamDurdur = sum(data,"durdurulan");
-  const toplamDavet = sum(data,"davet");
-  const toplamDavetSatin = sum(data,"davetsatin");
-
-  document.getElementById("topYeni").innerText = toplamYeni;
-  document.getElementById("topSatin").innerText = toplamSatin;
-  document.getElementById("topDurdur").innerText = toplamDurdur;
-  document.getElementById("topDavet").innerText = toplamDavet;
-  document.getElementById("topDavetSatin").innerText = toplamDavetSatin;
+  /* 📌 GENEL MÜŞTERİ */
+  document.getElementById("topYeni").innerText = sum(data,"yeni");
+  document.getElementById("topSatin").innerText = sum(data,"satin");
+  document.getElementById("topDurdur").innerText = sum(data,"durdurulan");
+  document.getElementById("topDavet").innerText = sum(data,"davet");
+  document.getElementById("topDavetSatin").innerText = sum(data,"davetsatin");
   document.getElementById("topCiro").innerText = numberToTL(toplamCiro);
 
-  /* =========================
-     🟣 FOKUS DOĞRU HESAPLAMA
-     ========================= */
-
-  const fokus1Hedef = Number(settings.fokus1Hedef || 0);
-  const fokus2Hedef = Number(settings.fokus2Hedef || 0);
-  const fokus3Hedef = Number(settings.fokus3Hedef || 0);
+  /* 📌 FOKUS */
+  const f1h=Number(settings.fokus1Hedef||0);
+  const f2h=Number(settings.fokus2Hedef||0);
+  const f3h=Number(settings.fokus3Hedef||0);
 
   const bugun = new Date().toISOString().split("T")[0];
-  const firstDay = new Date();
-  firstDay.setDate(1);
-  const firstDayString = firstDay.toISOString().split("T")[0];
+  const firstDay = new Date(); firstDay.setDate(1);
+  const firstStr = firstDay.toISOString().split("T")[0];
 
-  const monthRecords = data.filter(x => x.tarih >= firstDayString && x.tarih <= bugun);
+  const monthRecords = data.filter(x=>x.tarih>=firstStr && x.tarih<=bugun);
 
-  const fokus1YapildiToplam = monthRecords.reduce((t,x)=>t+Number(x.fokus1adet||0),0);
-  const fokus2YapildiToplam = monthRecords.reduce((t,x)=>t+Number(x.fokus2adet||0),0);
-  const fokus3YapildiToplam = monthRecords.reduce((t,x)=>t+Number(x.fokus3adet||0),0);
+  const f1y = monthRecords.reduce((t,x)=>t+Number(x.fokus1adet||0),0);
+  const f2y = monthRecords.reduce((t,x)=>t+Number(x.fokus2adet||0),0);
+  const f3y = monthRecords.reduce((t,x)=>t+Number(x.fokus3adet||0),0);
 
-  const fokus1Kalan = Math.max(0, fokus1Hedef - fokus1YapildiToplam);
-  const fokus2Kalan = Math.max(0, fokus2Hedef - fokus2YapildiToplam);
-  const fokus3Kalan = Math.max(0, fokus3Hedef - fokus3YapildiToplam);
+  const f1k = Math.max(0,f1h-f1y);
+  const f2k = Math.max(0,f2h-f2y);
+  const f3k = Math.max(0,f3h-f3y);
 
-  const fokus1Bugun = Math.ceil(fokus1Kalan / remainingDays);
-  const fokus2Bugun = Math.ceil(fokus2Kalan / remainingDays);
-  const fokus3Bugun = Math.ceil(fokus3Kalan / remainingDays);
+  document.getElementById("fokus1").innerText = Math.ceil(f1k/remainingDays);
+  document.getElementById("fokus2").innerText = Math.ceil(f2k/remainingDays);
+  document.getElementById("fokus3").innerText = Math.ceil(f3k/remainingDays);
 
-  document.getElementById("fokus1").innerText=fokus1Bugun;
-  document.getElementById("fokus2").innerText=fokus2Bugun;
-  document.getElementById("fokus3").innerText=fokus3Bugun;
+  document.getElementById("fokus1Hedef").innerText=f1h;
+  document.getElementById("fokus2Hedef").innerText=f2h;
+  document.getElementById("fokus3Hedef").innerText=f3h;
 
-  document.getElementById("fokus1Hedef").innerText=fokus1Hedef;
-  document.getElementById("fokus2Hedef").innerText=fokus2Hedef;
-  document.getElementById("fokus3Hedef").innerText=fokus3Hedef;
+  document.getElementById("fokus1Yapildi").innerText=f1y;
+  document.getElementById("fokus2Yapildi").innerText=f2y;
+  document.getElementById("fokus3Yapildi").innerText=f3y;
 
-  document.getElementById("fokus1Yapildi").innerText=fokus1YapildiToplam;
-  document.getElementById("fokus2Yapildi").innerText=fokus2YapildiToplam;
-  document.getElementById("fokus3Yapildi").innerText=fokus3YapildiToplam;
+  document.getElementById("fokus1Kalan").innerText=f1k;
+  document.getElementById("fokus2Kalan").innerText=f2k;
+  document.getElementById("fokus3Kalan").innerText=f3k;
 
-  document.getElementById("fokus1Kalan").innerText=fokus1Kalan;
-  document.getElementById("fokus2Kalan").innerText=fokus2Kalan;
-  document.getElementById("fokus3Kalan").innerText=fokus3Kalan;
-
-  const fokus1Yuzde = fokus1Hedef === 0 ? 0 : (fokus1YapildiToplam / fokus1Hedef) * 100;
-  const fokus2Yuzde = fokus2Hedef === 0 ? 0 : (fokus2YapildiToplam / fokus2Hedef) * 100;
-  const fokus3Yuzde = fokus3Hedef === 0 ? 0 : (fokus3YapildiToplam / fokus3Hedef) * 100;
-
-  document.getElementById("fokus1Yuzde").innerText = fokus1Yuzde.toFixed(1) + "%";
-  document.getElementById("fokus2Yuzde").innerText = fokus2Yuzde.toFixed(1) + "%";
-  document.getElementById("fokus3Yuzde").innerText = fokus3Yuzde.toFixed(1) + "%";
+  document.getElementById("fokus1Yuzde").innerText = (f1h? (f1y/f1h)*100:0).toFixed(1)+"%";
+  document.getElementById("fokus2Yuzde").innerText = (f2h? (f2y/f2h)*100:0).toFixed(1)+"%";
+  document.getElementById("fokus3Yuzde").innerText = (f3h? (f3y/f3h)*100:0).toFixed(1)+"%";
 }
 main();
 </script>
 
-<!-- 🔐 ŞİFRE SİSTEMİ -->
+<!-- PASSWORD -->
 <script>
-const CORRECT_PASSWORD = "EsteeLauder1751!";
-
-function showError() {
-  const err=document.getElementById("password-error");
-  err.style.opacity=1;
-  err.style.transform="translateY(0)";
-  setTimeout(()=>{
-    err.style.opacity=0;
-    err.style.transform="translateY(4px)";
-  },1500);
-}
+const CORRECT_PASSWORD="EsteeLauder1751!";
 
 function checkPassword(){
   const val=document.getElementById("password-input").value.trim();
   if(val===CORRECT_PASSWORD){
-    document.getElementById("password-screen").classList.add("fade-out");
-    setTimeout(()=>{
-      document.getElementById("password-screen").style.display="none";
-      document.getElementById("content").classList.remove("hidden");
-    },350);
+    document.getElementById("password-screen").style.display="none";
+    document.getElementById("content").classList.remove("hidden");
   } else {
-    showError();
+    document.getElementById("password-error").style.opacity=1;
+    setTimeout(()=>{document.getElementById("password-error").style.opacity=0;},1200);
   }
 }
-
-window.addEventListener("DOMContentLoaded",()=>{
-  const input=document.getElementById("password-input");
-  input.focus();
-  input.addEventListener("keydown",e=>{
-    if(e.key==="Enter") checkPassword();
-  });
-});
 </script>
 
 </body>
