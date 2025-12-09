@@ -81,10 +81,112 @@ td{
   padding:10px;
   border-bottom:1px solid #eee;
 }
+
+/* 🔐 ŞİFRE EKRANI */
+#password-screen{
+  position:fixed;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  background:radial-gradient(circle at top,#1f2937,#020617);
+  color:#f9fafb;
+  font-family:Arial, system-ui;
+  z-index:9999;
+  animation:fadeInBg 0.6s ease-out;
+}
+.password-box{
+  background:rgba(15,23,42,0.96);
+  padding:30px 26px;
+  border-radius:18px;
+  box-shadow:0 18px 45px rgba(0,0,0,0.5);
+  text-align:center;
+  width:280px;
+  max-width:90vw;
+  animation:floatUp 0.5s ease-out;
+  border:1px solid rgba(148,163,184,0.35);
+}
+.password-box h2{
+  margin:0 0 8px;
+  font-size:20px;
+}
+.password-box p{
+  margin:0 0 16px;
+  font-size:14px;
+  color:#cbd5f5;
+}
+#password-input{
+  padding:10px 12px;
+  width:100%;
+  border-radius:10px;
+  border:1px solid #4b5563;
+  outline:none;
+  background:#020617;
+  color:#f9fafb;
+  text-align:center;
+  font-size:15px;
+}
+#password-input:focus{
+  border-color:#38bdf8;
+  box-shadow:0 0 0 1px rgba(56,189,248,0.7);
+}
+.pass-btn{
+  margin-top:14px;
+  padding:10px 22px;
+  background:linear-gradient(135deg,#38bdf8,#818cf8);
+  color:#020617;
+  border:none;
+  border-radius:999px;
+  cursor:pointer;
+  font-weight:600;
+  font-size:14px;
+  transition:transform 0.1s ease, box-shadow 0.1s ease;
+}
+.pass-btn:active{
+  transform:scale(0.97);
+}
+#password-error{
+  margin-top:10px;
+  font-size:13px;
+  color:#fca5a5;
+  opacity:0;
+  transform:translateY(4px);
+  transition:opacity 0.25s, transform 0.25s;
+}
+#password-screen.fade-out{
+  animation:fadeOutBg 0.4s ease-in forwards;
+}
+.hidden{display:none;}
+
+@keyframes fadeInBg{
+  from{opacity:0; transform:scale(1.02);}
+  to{opacity:1; transform:scale(1);}
+}
+@keyframes fadeOutBg{
+  from{opacity:1;}
+  to{opacity:0; pointer-events:none;}
+}
+@keyframes floatUp{
+  from{opacity:0; transform:translateY(10px);}
+  to{opacity:1; transform:translateY(0);}
+}
 </style>
 </head>
 
 <body>
+
+<!-- 🔐 ŞİFRE EKRANI -->
+<div id="password-screen">
+  <div class="password-box">
+    <h2>🔒 Güvenli Dashboard</h2>
+    <p>Devam etmek için şifreyi gir.</p>
+    <input id="password-input" type="password" placeholder="Şifre" autocomplete="off"/>
+    <button class="pass-btn" onclick="checkPassword()">Giriş Yap</button>
+    <div id="password-error">❌ Hatalı şifre</div>
+  </div>
+</div>
+<div id="content" class="hidden">
 
 <div class="top-nav">
   <a href="setup.html">🎯 Ayı Başlat</a>
@@ -94,7 +196,7 @@ td{
 
 <h1>📊 Aylık Dashboard</h1>
 
-<!-- 🔵 CİRO KARTI -->
+<!-- 🔵 CİRO -->
 <div class="card">
   <h2>Aylık Ciro Performansı</h2>
   <p class="value">Hedef: <span id="ciroHedef">0</span></p>
@@ -107,7 +209,7 @@ td{
   <p class="value">%110 Günlük Gerekli: <span id="ciroGunluk110">0</span></p>
 </div>
 
-<!-- 🔵 HEDEF İLERLEME -->
+<!-- 🔵 HEDEF -->
 <div class="card">
   <h2>🎯 Hedef İlerleme</h2>
   <p class="value">Genel Başarı: <span id="basariYuzde">0%</span></p>
@@ -122,61 +224,54 @@ td{
   <p class="value">%110'e kalan: <span id="barem110">0</span></p>
 </div>
 
-<!-- 🔵 YÜZDELİK GRAFİK -->
+<!-- 🔵 GRAFİK -->
 <div class="card">
-  <h2>📊 Yüzdelik Hedef Grafik</h2>
-  <canvas id="yuzdelikChart" style="margin-top:15px;"></canvas>
+  <h2>📊 Yüzdelik Grafik</h2>
+  <canvas id="yuzdelikChart"></canvas>
 </div>
 
 <!-- 🔵 FOKUSLAR -->
 <div class="card">
-  <h2>🎯 Günlük Fokuslar</h2>
+  <h2>🎯 Fokus İlerleme</h2>
 
-  <p class="value">Fokus 1: <span id="fokus1">-</span></p>
+  <p class="value">Fokus 1 Günlük: <span id="fokus1">-</span></p>
   <p class="value">Hedef: <span id="fokus1Hedef">0</span></p>
-  <p class="value">Yapıldı: <span id="fokus1Yapildi">0</span></p>
+  <p class="value">Bugüne Kadar: <span id="fokus1Yapildi">0</span></p>
   <p class="value">Kalan: <span id="fokus1Kalan">0</span></p>
 
-  <p class="value">Fokus 2: <span id="fokus2">-</span></p>
+  <p class="value">Fokus 2 Günlük: <span id="fokus2">-</span></p>
   <p class="value">Hedef: <span id="fokus2Hedef">0</span></p>
-  <p class="value">Yapıldı: <span id="fokus2Yapildi">0</span></p>
+  <p class="value">Bugüne Kadar: <span id="fokus2Yapildi">0</span></p>
   <p class="value">Kalan: <span id="fokus2Kalan">0</span></p>
 
-  <p class="value">Fokus 3: <span id="fokus3">-</span></p>
+  <p class="value">Fokus 3 Günlük: <span id="fokus3">-</span></p>
   <p class="value">Hedef: <span id="fokus3Hedef">0</span></p>
-  <p class="value">Yapıldı: <span id="fokus3Yapildi">0</span></p>
+  <p class="value">Bugüne Kadar: <span id="fokus3Yapildi">0</span></p>
   <p class="value">Kalan: <span id="fokus3Kalan">0</span></p>
 </div>
 
-<!-- 🔵 MÜŞTERİ ANALİTİĞİ -->
-<div class="card">
-  <h2>👥 Müşteri Analitiği</h2>
-  <p class="value">Yeni Müşteri: <span id="yeniTop">0</span></p>
-  <p class="value">Satın Alan: <span id="satinTop">0</span></p>
-  <p class="value">Satın Alma Oranı (CR): <span id="cr">0%</span></p>
-  <p class="value">Durdurulan: <span id="durdurTop">0</span></p>
-  <p class="value">Durdurma Başarısı (SSR): <span id="ssr">0%</span></p>
-  <p class="value">Davet Edilen: <span id="davetTop">0</span></p>
-  <p class="value">Davet → Satış Alan: <span id="davetsatinTop">0</span></p>
-  <p class="value">Davet Başarısı (ICR): <span id="icr">0%</span></p>
+<!-- 🔵 TABLO -->
+<h2 style="color:#6a4cff;margin-top:30px;">📄 Günlük Kayıtlar</h2>
+<table>
+<tr>
+  <th>Tarih</th>
+  <th>Ciro</th>
+  <th>Yeni</th>
+  <th>Satın</th>
+  <th>Durdur</th>
+  <th>Davet</th>
+  <th>Davet Satın</th>
+  <th>Not</th>
+  <th>Sil</th>
+</tr>
+<tbody id="dataTable"></tbody>
+</table>
 </div>
 
-<h2 style="color:#6a4cff;margin-top:30px;">📄 Günlük Kayıtlar</h2>
 
-<table>
-  <tr>
-    <th>Tarih</th>
-    <th>Ciro</th>
-    <th>Yeni</th>
-    <th>Satın</th>
-    <th>Durdur</th>
-    <th>Davet</th>
-    <th>Davet Satın</th>
-    <th>Not</th>
-    <th>Sil</th>
-  </tr>
-  <tbody id="dataTable"></tbody>
-</table>
+<!-- ========================= -->
+<!--      JAVASCRIPT          -->
+<!-- ========================= -->
 
 <script type="module">
 import { numberToTL, loadMonthlyStats, loadDailyAll, deleteRecord } from "./common.js";
@@ -214,17 +309,21 @@ async function main(){
   const data=await loadDailyAll();
   renderTable(data);
 
+  /* =========================
+     🟣 CİRO HESAPLARI
+     ========================= */
   const toplamCiro=sum(data,"ciro");
   const hedef=Number(settings.monthlyGoal||0);
   const kalan=hedef-toplamCiro;
-
   const now=new Date();
   const totalDays=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
   const remainingDays=Math.max(1,totalDays-now.getDate()+1);
 
-  const gunluk=kalan/remainingDays;
+  const hedef80=hedef*0.8;
+  const hedef90=hedef*0.9;
+  const hedef100=hedef;
+  const hedef110=hedef*1.1;
 
-  const hedef80=hedef*0.8, hedef90=hedef*0.9, hedef100=hedef, hedef110=hedef*1.1;
   const kalan80=Math.max(0,hedef80-toplamCiro);
   const kalan90=Math.max(0,hedef90-toplamCiro);
   const kalan100=Math.max(0,hedef100-toplamCiro);
@@ -233,117 +332,103 @@ async function main(){
   document.getElementById("ciroHedef").innerText=numberToTL(hedef);
   document.getElementById("ciroYapilan").innerText=numberToTL(toplamCiro);
   document.getElementById("ciroKalan").innerText=numberToTL(kalan);
-  document.getElementById("ciroGunluk").innerText=numberToTL(gunluk);
+  document.getElementById("ciroGunluk").innerText=numberToTL(kalan/remainingDays);
 
   document.getElementById("ciroGunluk80").innerText=numberToTL(kalan80/remainingDays);
   document.getElementById("ciroGunluk90").innerText=numberToTL(kalan90/remainingDays);
   document.getElementById("ciroGunluk100").innerText=numberToTL(kalan100/remainingDays);
   document.getElementById("ciroGunluk110").innerText=numberToTL(kalan110/remainingDays);
 
-  const basari=hedef===0?0:(toplamCiro/hedef)*100;
-  document.getElementById("basariYuzde").innerText=basari.toFixed(1)+"%";
-  document.getElementById("progressBar").style.width=Math.min(basari,110)+"%";
-
   document.getElementById("barem80").innerText=numberToTL(kalan80);
   document.getElementById("barem90").innerText=numberToTL(kalan90);
   document.getElementById("barem100").innerText=numberToTL(kalan100);
   document.getElementById("barem110").innerText=numberToTL(kalan110);
 
-  // 🔵 YÜZDELİK GRAFİK
-  new Chart(document.getElementById("yuzdelikChart"),{
-    type:"bar",
-    data:{
-      labels:["%80","%90","%100","%110"],
-      datasets:[{
-        label:"Kalan Tutar",
-        data:[kalan80,kalan90,kalan100,kalan110],
-        backgroundColor:[
-          "rgba(255,99,132,0.6)",
-          "rgba(255,159,64,0.6)",
-          "rgba(75,192,192,0.6)",
-          "rgba(153,102,255,0.6)"
-        ],
-        borderColor:[
-          "rgba(255,99,132,1)",
-          "rgba(255,159,64,1)",
-          "rgba(75,192,192,1)",
-          "rgba(153,102,255,1)"
-        ],
-        borderWidth:2,
-        borderRadius:8
-      }]
-    },
-    options:{
-      responsive:true,
-      plugins:{legend:{display:false}},
-      scales:{
-        y:{
-          beginAtZero:true,
-          ticks:{callback:value=>numberToTL(value)}
-        }
-      }
-    }
-  });
+  const basari=(hedef===0?0:(toplamCiro/hedef)*100);
+  document.getElementById("basariYuzde").innerText=basari.toFixed(1)+"%";
+  document.getElementById("progressBar").style.width=Math.min(basari,110)+"%";
 
-  // 🔵 MÜŞTERİ ANALİTİĞİ
-  const yeniTop=sum(data,"yeni");
-  const satinTop=sum(data,"satin");
-  const durdurTop=sum(data,"durdurulan");
-  const davetTop=sum(data,"davet");
-  const davetsatinTop=sum(data,"davetsatin");
+  /* =========================
+     🟣 FOKUS DOĞRU HESAPLAMA
+     ========================= */
 
-  document.getElementById("yeniTop").innerText=yeniTop;
-  document.getElementById("satinTop").innerText=satinTop;
-  document.getElementById("durdurTop").innerText=durdurTop;
-  document.getElementById("davetTop").innerText=davetTop;
-  document.getElementById("davetsatinTop").innerText=davetsatinTop;
-
-  document.getElementById("cr").innerText=((satinTop/(yeniTop||1))*100).toFixed(1)+"%";
-  document.getElementById("ssr").innerText=((satinTop/(durdurTop||1))*100).toFixed(1)+"%";
-  document.getElementById("icr").innerText=((davetsatinTop/(davetTop||1))*100).toFixed(1)+"%";
-
-  // 🔵 FOKUSLARI YÜKLE (son kayıt metinleri)
-  const latest=data[data.length-1]||{};
-  document.getElementById("fokus1").innerText=latest.fokus1||"-";
-  document.getElementById("fokus2").innerText=latest.fokus2||"-";
-  document.getElementById("fokus3").innerText=latest.fokus3||"-";
-
-  // 🔵 FOKUS HESAPLARI (hedef / yapılan / kalan)
-
-  // setup.html'de kaydedilmiş günlük hedefler varsayılan 0
   const fokus1Hedef = Number(settings.fokus1Hedef || 0);
   const fokus2Hedef = Number(settings.fokus2Hedef || 0);
   const fokus3Hedef = Number(settings.fokus3Hedef || 0);
 
-  // Bugünün tarihi (YYYY-MM-DD formatında)
   const bugun = new Date().toISOString().split("T")[0];
+  const firstDay = new Date();
+  firstDay.setDate(1);
+  const firstDayString = firstDay.toISOString().split("T")[0];
 
-  // Sadece bugünün kayıtları
-  const todays = data.filter(x => x.tarih === bugun);
+  const monthRecords = data.filter(x => x.tarih >= firstDayString && x.tarih <= bugun);
 
-  // Bugün yapılan fokus adetleri (formdaki fokus1adet / fokus2adet / fokus3adet alanlarından)
-  const fokus1Yapildi = todays.reduce((t, x) => t + Number(x.fokus1adet || 0), 0);
-  const fokus2Yapildi = todays.reduce((t, x) => t + Number(x.fokus2adet || 0), 0);
-  const fokus3Yapildi = todays.reduce((t, x) => t + Number(x.fokus3adet || 0), 0);
+  const fokus1YapildiToplam = monthRecords.reduce((t,x)=>t+Number(x.fokus1adet||0),0);
+  const fokus2YapildiToplam = monthRecords.reduce((t,x)=>t+Number(x.fokus2adet||0),0);
+  const fokus3YapildiToplam = monthRecords.reduce((t,x)=>t+Number(x.fokus3adet||0),0);
 
-  const fokus1Kalan = Math.max(0, fokus1Hedef - fokus1Yapildi);
-  const fokus2Kalan = Math.max(0, fokus2Hedef - fokus2Yapildi);
-  const fokus3Kalan = Math.max(0, fokus3Hedef - fokus3Yapildi);
+  const fokus1Kalan = Math.max(0, fokus1Hedef - fokus1YapildiToplam);
+  const fokus2Kalan = Math.max(0, fokus2Hedef - fokus2YapildiToplam);
+  const fokus3Kalan = Math.max(0, fokus3Hedef - fokus3YapildiToplam);
 
-  document.getElementById("fokus1Hedef").innerText = fokus1Hedef;
-  document.getElementById("fokus1Yapildi").innerText = fokus1Yapildi;
-  document.getElementById("fokus1Kalan").innerText = fokus1Kalan;
+  const fokus1Bugun = Math.ceil(fokus1Kalan / remainingDays);
+  const fokus2Bugun = Math.ceil(fokus2Kalan / remainingDays);
+  const fokus3Bugun = Math.ceil(fokus3Kalan / remainingDays);
 
-  document.getElementById("fokus2Hedef").innerText = fokus2Hedef;
-  document.getElementById("fokus2Yapildi").innerText = fokus2Yapildi;
-  document.getElementById("fokus2Kalan").innerText = fokus2Kalan;
+  document.getElementById("fokus1").innerText=fokus1Bugun;
+  document.getElementById("fokus2").innerText=fokus2Bugun;
+  document.getElementById("fokus3").innerText=fokus3Bugun;
 
-  document.getElementById("fokus3Hedef").innerText = fokus3Hedef;
-  document.getElementById("fokus3Yapildi").innerText = fokus3Yapildi;
-  document.getElementById("fokus3Kalan").innerText = fokus3Kalan;
+  document.getElementById("fokus1Hedef").innerText=fokus1Hedef;
+  document.getElementById("fokus2Hedef").innerText=fokus2Hedef;
+  document.getElementById("fokus3Hedef").innerText=fokus3Hedef;
+
+  document.getElementById("fokus1Yapildi").innerText=fokus1YapildiToplam;
+  document.getElementById("fokus2Yapildi").innerText=fokus2YapildiToplam;
+  document.getElementById("fokus3Yapildi").innerText=fokus3YapildiToplam;
+
+  document.getElementById("fokus1Kalan").innerText=fokus1Kalan;
+  document.getElementById("fokus2Kalan").innerText=fokus2Kalan;
+  document.getElementById("fokus3Kalan").innerText=fokus3Kalan;
+
+}
+main();
+</script>
+
+<!-- 🔐 ŞİFRE SİSTEMİ -->
+<script>
+const CORRECT_PASSWORD = "EsteeLauder1751!";
+
+function showError() {
+  const err=document.getElementById("password-error");
+  err.style.opacity=1;
+  err.style.transform="translateY(0)";
+  setTimeout(()=>{
+    err.style.opacity=0;
+    err.style.transform="translateY(4px)";
+  },1500);
 }
 
-main();
+function checkPassword(){
+  const val=document.getElementById("password-input").value.trim();
+  if(val===CORRECT_PASSWORD){
+    document.getElementById("password-screen").classList.add("fade-out");
+    setTimeout(()=>{
+      document.getElementById("password-screen").style.display="none";
+      document.getElementById("content").classList.remove("hidden");
+    },350);
+  } else {
+    showError();
+  }
+}
+
+window.addEventListener("DOMContentLoaded",()=>{
+  const input=document.getElementById("password-input");
+  input.focus();
+  input.addEventListener("keydown",e=>{
+    if(e.key==="Enter") checkPassword();
+  });
+});
 </script>
 
 </body>
