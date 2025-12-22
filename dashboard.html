@@ -56,8 +56,6 @@ h1{
   font-weight:bold;
   margin-top:5px;
 }
-
-/* 🔵 MINI KUTU TASARIMI */
 .miniCard{
   background:white;
   border-radius:14px;
@@ -72,8 +70,6 @@ h1{
   margin-bottom:8px;
   color:#333;
 }
-
-/* SİL BUTONU */
 .delete-btn{
   background:#ff4a4a;
   border:none;
@@ -83,8 +79,6 @@ h1{
   cursor:pointer;
   font-size:13px;
 }
-
-/* TABLO */
 table{
   width:100%;
   border-collapse:collapse;
@@ -99,6 +93,33 @@ th{
 td{
   padding:10px;
   border-bottom:1px solid #eee;
+}
+
+/* ✅ AY SEÇİCİ */
+.month-bar{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  justify-content:center;
+  margin:12px 0 18px 0;
+  flex-wrap:wrap;
+}
+.month-btn{
+  border:none;
+  cursor:pointer;
+  padding:8px 12px;
+  border-radius:10px;
+  background:rgba(255,255,255,0.8);
+  box-shadow:0 2px 10px rgba(0,0,0,0.08);
+  font-weight:700;
+}
+#monthSelect{
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid rgba(0,0,0,0.12);
+  background:rgba(255,255,255,0.9);
+  min-width:180px;
+  font-weight:700;
 }
 
 /* 🔐 ŞİFRE EKRANI */
@@ -166,6 +187,13 @@ td{
 
 <h1>📊 Aylık Dashboard</h1>
 
+<!-- ✅ AY SEÇİCİ -->
+<div class="month-bar">
+  <button class="month-btn" id="prevMonth">◀</button>
+  <select id="monthSelect"></select>
+  <button class="month-btn" id="nextMonth">▶</button>
+</div>
+
 <!-- 🔵 CİRO KARTI -->
 <div class="card">
   <h2>Aylık Ciro</h2>
@@ -182,28 +210,24 @@ td{
     <div id="progressBar" style="height:10px;border-radius:10px;background:linear-gradient(90deg,#ff9a9e,#a1c4fd);width:0%;"></div>
   </div>
 
-  <!-- %80 -->
   <div class="miniCard">
     <div class="miniTitle">%80 Hedefi</div>
     <p>Kalan: <span id="barem80">0</span></p>
     <p>Günlük: <span id="barem80Gunluk">0</span></p>
   </div>
 
-  <!-- %90 -->
   <div class="miniCard">
     <div class="miniTitle">%90 Hedefi</div>
     <p>Kalan: <span id="barem90">0</span></p>
     <p>Günlük: <span id="barem90Gunluk">0</span></p>
   </div>
 
-  <!-- %100 -->
   <div class="miniCard">
     <div class="miniTitle">%100 Hedefi</div>
     <p>Kalan: <span id="barem100">0</span></p>
     <p>Günlük: <span id="barem100Gunluk">0</span></p>
   </div>
 
-  <!-- %110 -->
   <div class="miniCard">
     <div class="miniTitle">%110 Hedefi</div>
     <p>Kalan: <span id="barem110">0</span></p>
@@ -279,6 +303,46 @@ td{
 <script type="module">
 import { numberToTL, loadMonthlyStats, loadDailyAll, deleteRecord } from "./common.js";
 
+/* ✅ Tarih parse: "DD.MM.YYYY" + "YYYY-MM-DD" destek */
+function toISODateString(raw){
+  if(!raw) return "";
+  const s = String(raw).trim();
+
+  // ISO: 2025-12-07
+  if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+
+  // Bazı datalar "2025-12-\n07" gibi kırılabiliyor
+  const compact = s.replace(/\s+/g,"");
+  if (/^\d{4}-\d{2}-\d{2}$/.test(compact)) return compact;
+
+  // TR: 16.12.2025
+  const m = s.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+  if (m){
+    const dd = String(m[1]).padStart(2,"0");
+    const mm = String(m[2]).padStart(2,"0");
+    const yy = m[3];
+    return `${yy}-${mm}-${dd}`;
+  }
+
+  // Son çare: Date parse (tarayıcıya bağlı)
+  const d = new Date(s);
+  if(!isNaN(d.getTime())){
+    const yy = d.getFullYear();
+    const mm = String(d.getMonth()+1).padStart(2,"0");
+    const dd = String(d.getDate()).padStart(2,"0");
+    return `${yy}-${mm}-${dd}`;
+  }
+
+  return "";
+}
+
+function monthKeyFromISO(iso){ return iso ? iso.slice(0,7) : ""; } // "YYYY-MM"
+function monthLabel(key){
+  const [y,m] = key.split("-");
+  const months = ["Ocak","Şubat","Mart","Nisan","Mayıs","Haziran","Temmuz","Ağustos","Eylül","Ekim","Kasım","Aralık"];
+  return `${months[Number(m)-1]} ${y}`;
+}
+
 function renderTable(data){
   const tbody=document.getElementById("dataTable");
   tbody.innerHTML="";
@@ -307,18 +371,56 @@ window.deleteRow=async(id)=>{
 
 function sum(arr,key){return arr.reduce((t,x)=>t+Number(x[key]||0),0);}
 
-async function main(){
-  const settings=(await loadMonthlyStats())||{};
-  const data=await loadDailyAll();
-  renderTable(data);
+let ALL_DATA = [];
+let SETTINGS = {};
+let SELECTED_MONTH = ""; // "YYYY-MM"
+
+function getMonthRange(monthKey){
+  const [y,m]=monthKey.split("-").map(Number);
+  const start = new Date(y, m-1, 1);
+  const end   = new Date(y, m, 1); // sonraki ayın 1'i
+  return { start, end };
+}
+
+function isSameMonthAsToday(monthKey){
+  const now = new Date();
+  const mk = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
+  return mk === monthKey;
+}
+
+function filterBySelectedMonth(data){
+  const { start, end } = getMonthRange(SELECTED_MONTH);
+  const startISO = `${start.getFullYear()}-${String(start.getMonth()+1).padStart(2,"0")}-${String(start.getDate()).padStart(2,"0")}`;
+  const endISO   = `${end.getFullYear()}-${String(end.getMonth()+1).padStart(2,"0")}-${String(end.getDate()).padStart(2,"0")}`;
+
+  // ISO string compare güvenli (YYYY-MM-DD)
+  return data.filter(x => x._iso >= startISO && x._iso < endISO);
+}
+
+function refresh(){
+  const monthData = filterBySelectedMonth(ALL_DATA);
+
+  // ✅ Tablo: tarihe göre DESC sıralama
+  const tableData = [...monthData].sort((a,b)=> (a._iso < b._iso ? 1 : -1));
+  renderTable(tableData);
 
   /* 📌 CİRO */
-  const toplamCiro=sum(data,"ciro");
-  const hedef=Number(settings.monthlyGoal||0);
-  const kalan=hedef-toplamCiro;
-  const now=new Date();
-  const totalDays=new Date(now.getFullYear(),now.getMonth()+1,0).getDate();
-  const remainingDays=Math.max(1,totalDays-now.getDate()+1);
+  const toplamCiro = sum(monthData,"ciro");
+  const hedef = Number(SETTINGS.monthlyGoal||0);
+
+  // ✅ Seçilen aya göre gün hesabı
+  const { start, end } = getMonthRange(SELECTED_MONTH);
+  const totalDays = new Date(end.getFullYear(), end.getMonth(), 0).getDate();
+
+  // Günlük hesap: sadece mevcut ayda "bugüne göre" mantıklı
+  let remainingDays = 1;
+  if (isSameMonthAsToday(SELECTED_MONTH)){
+    const now = new Date();
+    remainingDays = Math.max(1, totalDays - now.getDate() + 1);
+  } else {
+    // geçmiş/gelecek ay: bölme patlamasın diye 1
+    remainingDays = 1;
+  }
 
   const hs={h80:hedef*0.8,h90:hedef*0.9,h100:hedef,h110:hedef*1.1};
   const ks={
@@ -346,27 +448,21 @@ async function main(){
   document.getElementById("progressBar").style.width=Math.min(basari,110)+"%";
 
   /* 📌 GENEL MÜŞTERİ */
-  document.getElementById("topYeni").innerText = sum(data,"yeni");
-  document.getElementById("topSatin").innerText = sum(data,"satin");
-  document.getElementById("topDurdur").innerText = sum(data,"durdurulan");
-  document.getElementById("topDavet").innerText = sum(data,"davet");
-  document.getElementById("topDavetSatin").innerText = sum(data,"davetsatin");
+  document.getElementById("topYeni").innerText = sum(monthData,"yeni");
+  document.getElementById("topSatin").innerText = sum(monthData,"satin");
+  document.getElementById("topDurdur").innerText = sum(monthData,"durdurulan");
+  document.getElementById("topDavet").innerText = sum(monthData,"davet");
+  document.getElementById("topDavetSatin").innerText = sum(monthData,"davetsatin");
   document.getElementById("topCiro").innerText = numberToTL(toplamCiro);
 
-  /* 📌 FOKUS */
-  const f1h=Number(settings.fokus1Hedef||0);
-  const f2h=Number(settings.fokus2Hedef||0);
-  const f3h=Number(settings.fokus3Hedef||0);
+  /* 📌 FOKUS (seçilen ayın kayıtları üzerinden) */
+  const f1h=Number(SETTINGS.fokus1Hedef||0);
+  const f2h=Number(SETTINGS.fokus2Hedef||0);
+  const f3h=Number(SETTINGS.fokus3Hedef||0);
 
-  const bugun = new Date().toISOString().split("T")[0];
-  const firstDay = new Date(); firstDay.setDate(1);
-  const firstStr = firstDay.toISOString().split("T")[0];
-
-  const monthRecords = data.filter(x=>x.tarih>=firstStr && x.tarih<=bugun);
-
-  const f1y = monthRecords.reduce((t,x)=>t+Number(x.fokus1adet||0),0);
-  const f2y = monthRecords.reduce((t,x)=>t+Number(x.fokus2adet||0),0);
-  const f3y = monthRecords.reduce((t,x)=>t+Number(x.fokus3adet||0),0);
+  const f1y = monthData.reduce((t,x)=>t+Number(x.fokus1adet||0),0);
+  const f2y = monthData.reduce((t,x)=>t+Number(x.fokus2adet||0),0);
+  const f3y = monthData.reduce((t,x)=>t+Number(x.fokus3adet||0),0);
 
   const f1k = Math.max(0,f1h-f1y);
   const f2k = Math.max(0,f2h-f2y);
@@ -391,6 +487,68 @@ async function main(){
   document.getElementById("fokus1Yuzde").innerText = (f1h? (f1y/f1h)*100:0).toFixed(1)+"%";
   document.getElementById("fokus2Yuzde").innerText = (f2h? (f2y/f2h)*100:0).toFixed(1)+"%";
   document.getElementById("fokus3Yuzde").innerText = (f3h? (f3y/f3h)*100:0).toFixed(1)+"%";
+}
+
+function buildMonthSelectFromData(){
+  const sel = document.getElementById("monthSelect");
+  sel.innerHTML = "";
+
+  // Data içinden mevcut ayları çıkar
+  const keys = Array.from(new Set(ALL_DATA.map(x=>monthKeyFromISO(x._iso)).filter(Boolean)))
+    .sort(); // asc
+
+  // Eğer hiç data yoksa yine de bu ayı göster
+  const now = new Date();
+  const thisKey = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
+  if(!keys.includes(thisKey)) keys.push(thisKey);
+
+  keys.forEach(k=>{
+    const opt=document.createElement("option");
+    opt.value = k;
+    opt.textContent = monthLabel(k);
+    sel.appendChild(opt);
+  });
+
+  // default: bu ay varsa bu ay, yoksa en son ay
+  SELECTED_MONTH = keys.includes(thisKey) ? thisKey : keys[keys.length-1];
+  sel.value = SELECTED_MONTH;
+
+  sel.addEventListener("change", ()=>{
+    SELECTED_MONTH = sel.value;
+    refresh();
+  });
+
+  document.getElementById("prevMonth").addEventListener("click", ()=>{
+    const idx = keys.indexOf(SELECTED_MONTH);
+    if(idx > 0){
+      SELECTED_MONTH = keys[idx-1];
+      sel.value = SELECTED_MONTH;
+      refresh();
+    }
+  });
+
+  document.getElementById("nextMonth").addEventListener("click", ()=>{
+    const idx = keys.indexOf(SELECTED_MONTH);
+    if(idx < keys.length-1){
+      SELECTED_MONTH = keys[idx+1];
+      sel.value = SELECTED_MONTH;
+      refresh();
+    }
+  });
+}
+
+async function main(){
+  SETTINGS = (await loadMonthlyStats()) || {};
+  const raw = await loadDailyAll();
+
+  // ✅ normalize + iso ekle
+  ALL_DATA = (raw || []).map(x=>{
+    const iso = toISODateString(x.tarih);
+    return { ...x, _iso: iso || "" };
+  }).filter(x=>x._iso); // iso olmayanı at
+
+  buildMonthSelectFromData();
+  refresh();
 }
 main();
 </script>
