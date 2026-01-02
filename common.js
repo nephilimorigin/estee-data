@@ -51,16 +51,61 @@ export function numberToTL(num) {
 // FIRESTORE FONKSİYONLARI
 // ========================
 
-// Aylık hedefi kaydet
-export async function saveMonthlyStats(data) {
-  await setDoc(doc(db, "monthlyStats", "current"), data);
+/*
+  🔁 AYLIK HEDEFLER
+  ✔ Eski global kayıtları algılar
+  ✔ Yeni ay bazlı sistemi destekler
+*/
+
+// 🔹 AYLIK hedefi KAYDET (geriye dönük uyumlu)
+export async function saveMonthlyStats(monthKeyOrData, maybeData) {
+
+  // 🧠 ESKİ KULLANIM: saveMonthlyStats(data)
+  if (typeof monthKeyOrData === "object") {
+    await setDoc(
+      doc(db, "monthlyStats", "current"),
+      monthKeyOrData
+    );
+    return;
+  }
+
+  // ✅ YENİ KULLANIM: saveMonthlyStats("2025-01", data)
+  const monthKey = monthKeyOrData;
+  const data = maybeData;
+
+  await setDoc(
+    doc(db, "monthlyStats", "current"),
+    { [monthKey]: data },
+    { merge: true }
+  );
 }
 
-// Aylık hedefi yükle
+// 🔹 AYLIK hedefi YÜKLE
 export async function loadMonthlyStats() {
   const snap = await getDoc(doc(db, "monthlyStats", "current"));
-  return snap.exists() ? snap.data() : null;
+  if (!snap.exists()) return {};
+
+  const data = snap.data();
+
+  // ✅ Eğer ay anahtarı varsa → yeni sistem
+  const hasMonthKey = Object.keys(data).some(k =>
+    /^\d{4}-\d{2}$/.test(k)
+  );
+
+  if (hasMonthKey) {
+    return data;
+  }
+
+  // ⚠️ ESKİ GLOBAL FORMAT → SADECE ARALIK
+  // ⬇️ GEREKİRSE BU AYI DEĞİŞTİR
+  return {
+    "2024-12": data
+  };
 }
+
+// ========================
+// GÜNLÜK VERİLER
+// ========================
 
 // Günlük veriyi kaydet
 export async function saveDaily(data) {
@@ -74,7 +119,7 @@ export async function loadDailyAll() {
 
   snap.forEach(d => {
     arr.push({
-      id: d.id,  // silme için gerekli
+      id: d.id,
       ...d.data()
     });
   });
