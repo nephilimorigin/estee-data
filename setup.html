@@ -6,95 +6,58 @@
 <title>Aylık Hedef Ayarı</title>
 
 <style>
-* { box-sizing: border-box; }
-
-body {
-    margin: 0;
-    padding: 0;
-    font-family: "Inter", Arial;
-    background: linear-gradient(135deg, #c3cfe2, #fde2e4, #edf2fb);
-    background-size: 300% 300%;
-    animation: gradientAni 12s ease infinite;
+*{box-sizing:border-box;}
+body{
+  margin:0;
+  font-family:Inter,Arial;
+  background:linear-gradient(135deg,#c3cfe2,#fde2e4,#edf2fb);
+  background-size:300% 300%;
+  animation:gradientAni 12s ease infinite;
 }
-
-@keyframes gradientAni {
-    0% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
-    100% { background-position: 0% 50%; }
+@keyframes gradientAni{
+  0%{background-position:0% 50%;}
+  50%{background-position:100% 50%;}
+  100%{background-position:0% 50%;}
 }
-
-.top-nav {
-    width: 100%;
-    display: flex;
-    justify-content: space-around;
-    background: rgba(255,255,255,0.35);
-    backdrop-filter: blur(10px);
-    padding: 12px;
-    position: sticky;
-    top: 0;
+.top-nav{
+  display:flex;
+  justify-content:space-around;
+  padding:12px;
+  background:rgba(255,255,255,0.35);
+  backdrop-filter:blur(10px);
 }
-
-.top-nav a {
-    text-decoration: none;
-    font-size: 17px;
-    font-weight: 600;
-    color: #4b3f72;
+.top-nav a{
+  text-decoration:none;
+  font-weight:600;
+  color:#4b3f72;
 }
-
-.container {
-    max-width: 480px;
-    margin: 40px auto;
-    padding: 22px;
-    border-radius: 20px;
-    background: rgba(255, 255, 255, 0.55);
-    backdrop-filter: blur(16px);
-    box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+.container{
+  max-width:480px;
+  margin:40px auto;
+  padding:22px;
+  border-radius:20px;
+  background:rgba(255,255,255,0.55);
+  backdrop-filter:blur(16px);
+  box-shadow:0 8px 25px rgba(0,0,0,0.1);
 }
-
-h1 {
-    text-align: center;
-    font-size: 28px;
-    color: #374785;
-    margin-bottom: 25px;
-    text-shadow: 0 2px 10px rgba(255,255,255,0.8);
+h1{text-align:center;color:#374785;}
+label{margin-top:14px;display:block;font-weight:600;}
+input{
+  width:100%;
+  padding:14px;
+  margin-top:6px;
+  border-radius:14px;
+  border:none;
 }
-
-label {
-    font-size: 15px;
-    font-weight: 600;
-    display: block;
-    margin-top: 14px;
-    color: #374785;
-}
-
-input {
-    width: 100%;
-    padding: 14px;
-    margin-top: 6px;
-    border-radius: 14px;
-    border: none;
-    background: rgba(255,255,255,0.8);
-    box-shadow: inset 0 0 6px rgba(0,0,0,0.1);
-    font-size: 15px;
-    outline: none;
-}
-
-button {
-    width: 100%;
-    margin-top: 25px;
-    padding: 14px;
-    background: linear-gradient(135deg, #9face6, #74ebd5, #78ffd6);
-    border: none;
-    border-radius: 18px;
-    font-size: 18px;
-    color: #333;
-    font-weight: bold;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-    cursor: pointer;
-}
-
-button:hover {
-    opacity: 0.92;
+button{
+  width:100%;
+  margin-top:25px;
+  padding:14px;
+  border:none;
+  border-radius:18px;
+  font-size:18px;
+  font-weight:bold;
+  cursor:pointer;
 }
 </style>
 </head>
@@ -102,34 +65,32 @@ button:hover {
 <body>
 
 <div class="top-nav">
-    <a href="setup.html">🎯 Ayı Başlat</a>
-    <a href="form.html">📝 Günlük Veri</a>
-    <a href="dashboard.html">📊 Dashboard</a>
+  <a href="setup.html">🎯 Ayı Başlat</a>
+  <a href="form.html">📝 Günlük Veri</a>
+  <a href="dashboard.html">📊 Dashboard</a>
 </div>
 
 <div class="container">
 <h1>Aylık Hedef Ayarı</h1>
 
-<!-- Ciro hedefi -->
+<label>Hangi Ay İçin?</label>
+<input type="month" id="monthKey">
+
 <label>Aylık Ciro Hedefi (TL)</label>
 <input type="text" id="monthlyGoal">
 
-<!-- Fokus adları -->
 <label>Fokus 1 Adı</label>
 <input type="text" id="fokus1_ad">
-
 <label>Fokus 1 Hedef</label>
 <input type="number" id="fokus1_hedef">
 
 <label>Fokus 2 Adı</label>
 <input type="text" id="fokus2_ad">
-
 <label>Fokus 2 Hedef</label>
 <input type="number" id="fokus2_hedef">
 
 <label>Fokus 3 Adı</label>
 <input type="text" id="fokus3_ad">
-
 <label>Fokus 3 Hedef</label>
 <input type="number" id="fokus3_hedef">
 
@@ -138,53 +99,61 @@ button:hover {
 
 <script type="module">
 import {
-    formatTLLive,
-    TLtoNumber,
-    saveMonthlyStats,
-    loadMonthlyStats
+  formatTLLive,
+  TLtoNumber,
+  saveMonthlyStats,
+  loadMonthlyStats
 } from "./common.js";
 
-// TL canlı formatlama
-const monthlyGoalInput = document.getElementById("monthlyGoal");
-monthlyGoalInput.addEventListener("input", () => {
-    const pos = monthlyGoalInput.selectionStart;
-    const before = monthlyGoalInput.value.length;
+const monthInput=document.getElementById("monthKey");
+const goalInput=document.getElementById("monthlyGoal");
 
-    monthlyGoalInput.value = formatTLLive(monthlyGoalInput.value);
+// default = bu ay
+const now=new Date();
+monthInput.value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}`;
 
-    const after = monthlyGoalInput.value.length;
-    monthlyGoalInput.selectionEnd = pos + (after - before);
+goalInput.addEventListener("input",()=>{
+  const p=goalInput.selectionStart;
+  const b=goalInput.value.length;
+  goalInput.value=formatTLLive(goalInput.value);
+  const a=goalInput.value.length;
+  goalInput.selectionEnd=p+(a-b);
 });
 
-// VARSA ÖNCEKİ AYARLARI GETİR
-(async () => {
-    const old = await loadMonthlyStats();
-    if (old) {
-        monthlyGoalInput.value = formatTLLive(old.monthlyGoal.toString());
-        document.getElementById("fokus1_ad").value = old.fokus1_ad;
-        document.getElementById("fokus1_hedef").value = old.fokus1_hedef;
-        document.getElementById("fokus2_ad").value = old.fokus2_ad;
-        document.getElementById("fokus2_hedef").value = old.fokus2_hedef;
-        document.getElementById("fokus3_ad").value = old.fokus3_ad;
-        document.getElementById("fokus3_hedef").value = old.fokus3_hedef;
-    }
-})();
+async function loadMonth(){
+  const all=await loadMonthlyStats();
+  const m=monthInput.value;
+  const d=all[m];
 
-// KAYDETME
-document.getElementById("saveBtn").onclick = async () => {
-    const data = {
-        monthlyGoal: TLtoNumber(monthlyGoalInput.value),
-        fokus1_ad: document.getElementById("fokus1_ad").value,
-        fokus1_hedef: Number(document.getElementById("fokus1_hedef").value),
-        fokus2_ad: document.getElementById("fokus2_ad").value,
-        fokus2_hedef: Number(document.getElementById("fokus2_hedef").value),
-        fokus3_ad: document.getElementById("fokus3_ad").value,
-        fokus3_hedef: Number(document.getElementById("fokus3_hedef").value)
-    };
+  const fields=["fokus1_ad","fokus1_hedef","fokus2_ad","fokus2_hedef","fokus3_ad","fokus3_hedef"];
+  fields.forEach(id=>document.getElementById(id).value="");
+  goalInput.value="";
 
-    await saveMonthlyStats(data);
+  if(!d) return;
 
-    alert("✔ Ay başarıyla ayarlandı!");
+  goalInput.value=formatTLLive(d.monthlyGoal||0);
+  fields.forEach(id=>document.getElementById(id).value=d[id]||"");
+}
+
+monthInput.addEventListener("change",loadMonth);
+loadMonth();
+
+document.getElementById("saveBtn").onclick=async()=>{
+  const m=monthInput.value;
+  if(!m) return alert("Ay seçmelisin");
+
+  const data={
+    monthlyGoal:TLtoNumber(goalInput.value),
+    fokus1_ad:fokus1_ad.value,
+    fokus1_hedef:Number(fokus1_hedef.value),
+    fokus2_ad:fokus2_ad.value,
+    fokus2_hedef:Number(fokus2_hedef.value),
+    fokus3_ad:fokus3_ad.value,
+    fokus3_hedef:Number(fokus3_hedef.value)
+  };
+
+  await saveMonthlyStats(m,data);
+  alert("✔ Ay başarıyla başlatıldı");
 };
 </script>
 
